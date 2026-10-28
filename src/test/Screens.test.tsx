@@ -155,7 +155,9 @@ describe('Lodhi AI Screens & Quality Assurance Suite', () => {
     expect(await screen.findByText('SafeProject')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('treeitem', { name: /src/i }));
     fireEvent.click(await screen.findByRole('treeitem', { name: /main.ts/i }));
-    expect(await screen.findByLabelText(/Selected file preview/i)).toHaveTextContent('const value = 1;');
+    await waitFor(async () => {
+      expect(await screen.findByLabelText(/Selected file preview/i)).toHaveTextContent('const value = 1;');
+    });
     fireEvent.change(screen.getByLabelText(/Describe the change/i), { target: { value: 'Change the value to two.' } });
     fireEvent.click(screen.getByRole('button', { name: /Generate proposal/i }));
     expect(await screen.findByText(/Would change: src\/main.ts/i)).toBeInTheDocument();
