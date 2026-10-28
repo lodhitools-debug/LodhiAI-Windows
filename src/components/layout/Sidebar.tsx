@@ -34,12 +34,12 @@ export const Sidebar: React.FC = () => {
     { id: 'chat', label: 'AI Chat', icon: <MessageSquare size={18} />, badge: 'Ready' },
     { id: 'code', label: 'AI Coding Agent', icon: <Code2 size={18} />, badge: 'Active' },
     { id: 'workspace', label: 'Project Workspace', icon: <FolderGit2 size={18} />, badge: 'Active' },
-    { id: 'agents', label: 'Automation Agents', icon: <Bot size={18} />, phaseBadge: 'P4' },
-    { id: 'documents', label: 'Documents & Files', icon: <FileText size={18} />, phaseBadge: 'P3' },
-    { id: 'knowledge', label: 'Knowledge Base', icon: <Database size={18} />, phaseBadge: 'P3' },
-    { id: 'models', label: 'Model Providers', icon: <Cpu size={18} />, phaseBadge: 'P2' },
-    { id: 'settings', label: 'Settings', icon: <Settings size={18} /> },
-    { id: 'diagnostics', label: 'Diagnostics & Logs', icon: <Activity size={18} /> },
+    { id: 'agents', label: 'Automation Agents', icon: <Bot size={18} />, badge: 'Active' },
+    { id: 'documents', label: 'Documents & Files', icon: <FileText size={18} />, badge: 'Active' },
+    { id: 'knowledge', label: 'Knowledge Base', icon: <Database size={18} />, badge: 'Active' },
+    { id: 'models', label: 'Model Providers', icon: <Cpu size={18} />, badge: 'Active' },
+    { id: 'settings', label: 'Settings', icon: <Settings size={18} />, badge: 'Ready' },
+    { id: 'diagnostics', label: 'Diagnostics & Logs', icon: <Activity size={18} />, badge: 'Live' },
   ];
 
   return (
@@ -89,7 +89,7 @@ export const Sidebar: React.FC = () => {
               onClick={() => setActiveScreen(item.id)}
               className={`nav-item ${isActive ? 'active' : ''}`}
               title={sidebarCollapsed ? item.label : undefined}
-              aria-label={item.id === 'code' ? 'AI Coding Agent & Coding Assistant' : undefined}
+              aria-label={item.id === 'code' ? 'AI Coding Agent & Coding Assistant' : item.label}
             >
               <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
                 {item.icon}

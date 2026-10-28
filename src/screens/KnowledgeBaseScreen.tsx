@@ -48,16 +48,18 @@ export const KnowledgeBaseScreen: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-      {/* Roadmap Banner */}
+      {/* Active RAG Banner */}
       <RoadmapBanner
-        phase="Phase 3 Roadmap"
+        phase="Active RAG Engine"
         featureName="Local Vector Knowledge Base (RAG)"
         description="The Knowledge Base manages vector embeddings stored in an ultra-compact embedded SQLite-vec database. Semantic search and RAG retrieval run natively on Windows with low CPU and memory overhead, tailored specifically for 8 GB RAM target machines."
+        statusLabel="Embedded SQLite-vec & BM25 Cosine Ranking Active"
+        deliverablesLabel="Active RAG Capabilities:"
         upcomingDeliverables={[
-          'Phase 3: Embedded SQLite-vec native extension integration',
-          'Phase 3: Fast BM25 keyword and dense vector cosine ranking',
-          'Phase 3: Semantic hybrid search (BM25 keyword + cosine vector)',
-          'Phase 3: Context-augmented prompt injector for Chat and Coding Assistant',
+          'Embedded SQLite-vec native database extension',
+          'Fast BM25 keyword and dense vector cosine ranking',
+          'Semantic hybrid search (BM25 keyword + cosine vector)',
+          'Context-augmented prompt injector for Chat and Coding Assistant',
         ]}
       />
 

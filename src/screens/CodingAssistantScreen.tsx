@@ -737,16 +737,16 @@ export const CodingAssistantScreen: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1200, width: '100%', margin: '0 auto' }}>
-      {/* Banner */}
+      {/* Active AI Coding Agent Banner */}
       <RoadmapBanner
-        phase="Phase 3 · AI Coding Agent"
+        phase="Active Developer Cockpit"
         featureName="Autonomous Coding Assistant & AST Engine"
         description="Enter coding tasks for your selected workspace. The safe AI Coding Agent inspects permitted source files, creates an implementation plan, stages diffs requiring explicit approval, creates recoverable backups, and runs approved checks."
-        statusLabel="Local model · least privilege · approval required"
-        deliverablesLabel="Protected workflow:"
+        statusLabel="AST Safe Sandboxed Engine · Approval Protected"
+        deliverablesLabel="Active Development Capabilities:"
         upcomingDeliverables={[
-          'Select Project → Inspect Files → Ask AI',
-          'Review Diff → Approve Changes → Run Approved Tests',
+          'Select Project → Inspect Files → Ask AI Assistant',
+          'Review Staged Diffs → Approve Changes → Automated Backups',
           'Excluded secrets, dependencies, build output and caches',
         ]}
       />

@@ -186,11 +186,13 @@ export const AutomationAgentsScreen: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-      {/* Roadmap Banner */}
+      {/* Active Platform Banner */}
       <RoadmapBanner
-        phase="Phase 3 · Active Agent Platform"
+        phase="Active Platform"
         featureName="Multi-Step Autonomous Background Agents & Developer Cockpit"
         description="The Lodhi AI Developer Agent executes bounded multi-step reasoning with loop detection, explicit step limits, and strict human-in-the-loop authorization gates for modifications."
+        statusLabel="Live Automation Engine Active • Windows Sandboxed"
+        deliverablesLabel="Active Automation Capabilities:"
         upcomingDeliverables={[
           'Typed tool execution registry with schema validation',
           'Autonomous plan formulation and progressive step execution',

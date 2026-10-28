@@ -207,18 +207,18 @@ export const ModelSettingsScreen: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
-      {/* Roadmap Banner */}
+      {/* Active AI Engine Banner */}
       <RoadmapBanner
-        phase="Phase 2 · Model Providers"
-        featureName="Local AI Chat"
-        description="Choose between local Ollama inference (100% private, on-device) or Google Gemini Cloud API (authenticated via native secure vault). Credentials never touch browser storage."
-        statusLabel="Rust Ollama & Gemini backends active"
-        deliverablesLabel="Active provider capabilities:"
+        phase="Active AI Engine"
+        featureName="Polyglot AI Engine · Local AI Chat & Gemini Cloud"
+        description="Choose between Google Gemini Cloud API (authenticated via native Windows DPAPI secure vault) or local Ollama inference (100% private, on-device). Credentials never touch browser storage."
+        statusLabel="Google Gemini 3.8 Flash & Ollama Backends Active"
+        deliverablesLabel="Active Provider Capabilities:"
         upcomingDeliverables={[
-          'Local Ollama inference with qwen2.5-coder:3b',
-          'Google Gemini 2.0 Flash and 1.5 Pro integration',
-          'Zero-leak native secret vault (%APPDATA%\\com.lodhiai.desktop)',
-          'Explicit cloud privacy and egress consent protection',
+          'Google Gemini 3.8 Flash & 2.0 Flash high-speed inference',
+          'Local Ollama inference with qwen2.5-coder and deepseek models',
+          'Zero-leak native Windows DPAPI secret vault (%APPDATA%\\com.lodhiai.desktop)',
+          'Strict least-privilege cloud privacy and human consent modal',
         ]}
       />
 

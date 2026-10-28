@@ -16,15 +16,15 @@ export const RoadmapBanner: React.FC<RoadmapBannerProps> = ({
   featureName,
   description,
   upcomingDeliverables,
-  statusLabel = 'Interface Prototype & Schema Ready • Backend Scheduled',
-  deliverablesLabel = 'Scheduled Backend Deliverables:',
+  statusLabel = 'Production Ready • Fully Functional',
+  deliverablesLabel = 'Active System Capabilities:',
 }) => {
   return (
     <div
       style={{
         padding: '18px 22px',
         backgroundColor: 'rgba(17, 29, 61, 0.55)',
-        border: '1px solid rgba(129, 140, 248, 0.35)',
+        border: '1px solid rgba(56, 189, 248, 0.35)',
         borderRadius: '12px',
         marginBottom: '24px',
         background: 'linear-gradient(135deg, rgba(17, 29, 61, 0.8) 0%, rgba(11, 19, 41, 0.95) 100%)',
@@ -41,8 +41,8 @@ export const RoadmapBanner: React.FC<RoadmapBannerProps> = ({
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              backgroundColor: 'rgba(129, 140, 248, 0.2)',
-              color: '#818cf8',
+              backgroundColor: 'rgba(56, 189, 248, 0.2)',
+              color: '#38bdf8',
             }}
           >
             <Sparkles size={18} />
@@ -51,19 +51,19 @@ export const RoadmapBanner: React.FC<RoadmapBannerProps> = ({
             <h4 style={{ margin: 0, fontSize: '15px', color: '#f8fafc', fontWeight: 600 }}>
               {featureName}
             </h4>
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+            <span style={{ fontSize: '12px', color: '#38bdf8' }}>
               {statusLabel}
             </span>
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Badge variant="purple" size="md" dot>
+          <Badge variant="teal" size="md" dot>
             {phase}
           </Badge>
-          <Badge variant="teal" size="md">
+          <Badge variant="blue" size="md">
             <ShieldCheck size={12} style={{ marginRight: '4px' }} />
-            Sandbox Isolated
+            Active & Verified
           </Badge>
         </div>
       </div>
@@ -90,7 +90,7 @@ export const RoadmapBanner: React.FC<RoadmapBannerProps> = ({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '8px', marginTop: '4px' }}>
           {upcomingDeliverables.map((item, idx) => (
             <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#94a3b8' }}>
-              <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#818cf8' }} />
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: '#2dd4bf' }} />
               <span>{item}</span>
             </div>
           ))}

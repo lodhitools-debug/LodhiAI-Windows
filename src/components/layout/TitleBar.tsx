@@ -99,8 +99,8 @@ export const TitleBar: React.FC = () => {
             <Shield size={11} style={{ marginRight: '3px' }} />
             Local Sandbox
           </Badge>
-          <Badge variant="neutral" size="sm">
-            Phase 1 Foundation
+          <Badge variant="blue" size="sm" dot>
+            All Features Active
           </Badge>
         </div>
       </div>

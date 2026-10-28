@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "940673221193",
+    "project_id": "lodhi-ai-assistant",
+    "storage_bucket": "lodhi-ai-assistant.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:940673221193:android:15bce8d3e72f2a786df598",
+        "android_client_info": {
+          "package_name": "com.lodhideveleper.lodhiai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDTdQouwa43ZNxcUNT7Tcj9dvDgr1I55fA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

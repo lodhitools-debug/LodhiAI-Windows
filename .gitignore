@@ -30,7 +30,6 @@ PHASE3_CARGO_FILEIO_TRACE*
 .env.development.local
 .env.test.local
 .env.production.local
-google-services.json
 *serviceAccount*.json
 *.pem
 *.key
