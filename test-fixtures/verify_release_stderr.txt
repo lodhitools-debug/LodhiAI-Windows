@@ -1,0 +1,3 @@
+[LodhiAI UI] Desktop core initialized. is_dev: false
+[LodhiAI UI] Page load event: Started for URL: http://tauri.localhost/
+[LodhiAI UI] Page load event: Finished for URL: http://tauri.localhost/

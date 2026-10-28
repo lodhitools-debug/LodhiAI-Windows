@@ -1,0 +1,41 @@
+name: Lodhi AI — Desktop & Backend Full CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test-desktop-and-backend:
+    name: TypeScript, Vitest, Rust & Relay Regression Suite
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Codebase
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: TypeScript Static Typecheck
+        run: npm run type-check
+
+      - name: Run Vitest Suite (React, SaaS & Relay E2E)
+        run: npm test -- --run
+
+      - name: Build Vite Production Assets
+        run: npm run build
+
+      - name: Setup Rust Stable
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cargo Unit & Integration Tests (Tauri Native Core)
+        run: cargo test --manifest-path src-tauri/Cargo.toml -- --nocapture

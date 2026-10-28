@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // GLOBAL SECURITY POLICY: DENY BY DEFAULT
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // =========================================================================
+    // HELPER FUNCTIONS
+    // =========================================================================
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isServerAdmin() {
+      // True only if request has custom claim 'admin' or executed via Cloud Function / Admin SDK
+      return isAuthenticated() && request.auth.token.get('admin', false) == true;
+    }
+
+    // =========================================================================
+    // 1. USER PROFILE COLLECTION: users/{uid}
+    // =========================================================================
+    match /users/{userId} {
+      // Only owner can read their profile
+      allow read: if isOwner(userId) || isServerAdmin();
+
+      // Owner can create their profile on first signup with free plan only
+      allow create: if isOwner(userId)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.get('plan', 'free') == 'free'
+                    && request.resource.data.get('role', 'developer') in ['owner', 'developer', 'viewer'];
+
+      // Owner can update safe profile metadata, but NEVER privileged plan or role
+      allow update: if isOwner(userId)
+                    && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['plan', 'role', 'createdAt', 'uid'])
+                    || isServerAdmin();
+
+      allow delete: if isServerAdmin();
+
+      // =======================================================================
+      // 2. DEVICE REGISTRY: users/{uid}/devices/{deviceId}
+      // =======================================================================
+      match /devices/{deviceId} {
+        allow read: if isOwner(userId) || isServerAdmin();
+
+        // Enforce valid device types and prevent client from spoofing deviceId
+        allow create: if isOwner(userId)
+                      && request.resource.data.deviceId == deviceId
+                      && request.resource.data.deviceType in ['windows_desktop', 'android_companion']
+                      && request.resource.data.revoked == false;
+
+        // User can update lastActiveAt or mark device revoked
+        allow update: if isOwner(userId)
+                      && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['deviceId', 'deviceType', 'pairedAt']);
+
+        allow delete: if isOwner(userId) || isServerAdmin();
+      }
+
+      // =======================================================================
+      // 3. SUBSCRIPTIONS: users/{uid}/subscriptions/{subId}
+      // =======================================================================
+      match /subscriptions/{subId} {
+        // Read-only for authenticated user; STRICTLY FORBIDDEN to write from client!
+        allow read: if isOwner(userId) || isServerAdmin();
+        allow write: if isServerAdmin();
+      }
+
+      // =======================================================================
+      // 4. USAGE COUNTERS: users/{uid}/usage/{recordId}
+      // =======================================================================
+      match /usage/{recordId} {
+        // Read-only for authenticated user; STRICTLY FORBIDDEN to alter from client!
+        allow read: if isOwner(userId) || isServerAdmin();
+        allow write: if isServerAdmin();
+      }
+
+      // =======================================================================
+      // 5. APPROVED WORKSPACES: users/{uid}/workspaces/{workspaceId}
+      // =======================================================================
+      match /workspaces/{workspaceId} {
+        allow read: if isOwner(userId) || isServerAdmin();
+
+        allow create, update: if isOwner(userId)
+                              && request.resource.data.workspaceId == workspaceId
+                              && request.resource.data.name is string
+                              && request.resource.data.pathAlias is string
+                              && request.resource.data.isApprovedForRemote is bool;
+
+        allow delete: if isOwner(userId) || isServerAdmin();
+      }
+    }
+
+    // =========================================================================
+    // 6. PAIRING SESSIONS: pairingSessions/{sessionId}
+    // =========================================================================
+    match /pairingSessions/{sessionId} {
+      // Any authenticated user can read an unexpired session to verify PIN
+      allow read: if isAuthenticated() && (resource == null || resource.data.expiresAt > request.time);
+
+      // Desktop owner creates pairing session with 5-minute TTL
+      allow create: if isAuthenticated()
+                    && request.resource.data.windowsUid == request.auth.uid
+                    && request.resource.data.status == 'pending'
+                    && request.resource.data.expiresAt > request.time
+                    && request.resource.data.expiresAt <= request.time + duration.value(360, 's');
+
+      // Android companion redeems pairing session
+      allow update: if isAuthenticated()
+                    && resource.data.status == 'pending'
+                    && resource.data.expiresAt > request.time
+                    && request.resource.data.status == 'paired'
+                    && request.resource.data.pairedAndroidDeviceId is string;
+
+      // Desktop owner or admin can cancel session
+      allow delete: if isAuthenticated() && (resource.data.windowsUid == request.auth.uid || isServerAdmin());
+    }
+  }
+}

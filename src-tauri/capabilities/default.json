@@ -1,0 +1,9 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Least-privilege capability set for Lodhi AI desktop core",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

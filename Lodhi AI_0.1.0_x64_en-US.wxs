@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="{2C46FE2A-1446-45F0-A537-DD2FE8A266C7}" Codepage="1252" Language="1033" Manufacturer="lodhiai" Name="Lodhi AI" UpgradeCode="{6C50665C-80A7-59D7-B94A-A213A1B394A5}" Version="0.1.0">
+        <Package Comments="This installer database contains the logic and data required to install Lodhi AI." Compressed="yes" Description="Lodhi AI" InstallerVersion="450" Languages="0" Manufacturer="lodhiai" Platform="x64" />
+        <CustomAction Id="LaunchApplication" FileKey="Path" ExeCommand="[LAUNCHAPPARGS]" Return="asyncNoWait" />
+        <CustomAction Id="SetARPNOMODIFY" Property="ARPNOMODIFY" Value="1" />
+        <CustomAction Id="DownloadAndInvokeBootstrapper" Directory="INSTALLDIR" ExeCommand="powershell.exe -NoProfile -windowstyle hidden try [\{] [\[]Net.ServicePointManager[\]]::SecurityProtocol = [\[]Net.SecurityProtocolType[\]]::Tls12 [\}] catch [\{][\}]; Invoke-WebRequest -Uri &quot;https://go.microsoft.com/fwlink/p/?LinkId=2124703&quot; -OutFile &quot;$env:TEMP\MicrosoftEdgeWebview2Setup.exe&quot; ; Start-Process -FilePath &quot;$env:TEMP\MicrosoftEdgeWebview2Setup.exe&quot; -ArgumentList ('/silent', '/install') -Wait" Execute="deferred" />
+        <CustomAction Id="SetARPINSTALLLOCATION" Property="ARPINSTALLLOCATION" Value="[INSTALLDIR]" />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="DesktopFolder" Name="Desktop">
+                <Component Id="ApplicationShortcutDesktop" Guid="{70327C8E-633A-5F03-B25C-1C20DFB1E97C}" Win64="yes">
+                    <RegistryValue Id="regEB1D99E2075F132D86947C7E8AC01E26" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Name="Desktop Shortcut" Value="1" Type="integer" KeyPath="yes" />
+                    <RemoveFolder Id="DesktopFolder" Directory="DesktopFolder" On="uninstall" />
+                    <Shortcut Id="ApplicationDesktopShortcut" Directory="DesktopFolder" Name="Lodhi AI" ShortName="ch6ehbah" Target="[!Path]" Description="Runs Lodhi AI" WorkingDirectory="INSTALLDIR" />
+                </Component>
+            </Directory>
+            <Directory Id="ProgramFiles64Folder" Name="PFiles">
+                <Directory Id="INSTALLDIR" Name="Lodhi AI" ShortName="bdafcw6j">
+                    <Component Id="RegistryEntries" Guid="{AF66FDF4-E890-5A99-BF48-B91DC9E88FDA}" Win64="yes">
+                        <RegistryValue Id="reg1FDEA6D313A573DDC36149383556FAE1" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Name="InstallDir" Value="[INSTALLDIR]" Type="string" KeyPath="yes" />
+                    </Component>
+                    <Component Id="Path" Guid="{858FBF59-2FB0-572D-A689-E0778BD6ACEC}" Win64="yes">
+                        <File Id="Path" Name="lodhi-ai.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="C:\Users\Umar Hayat\.gemini\antigravity-ide\brain\a2696207-e18e-474b-9ae7-ea077b698b04\scratch\msi_unpack\File\Path" />
+                    </Component>
+                    <Component Id="I0cafceba9cd245669a207fa6c96e1cc9" Guid="{1782A753-D4F9-4D77-8089-47A18D6D5D71}" KeyPath="yes" Win64="yes">
+                        <CreateFolder Directory="INSTALLDIR" />
+                        <File Id="PathFile_I0cafceba9cd245669a207fa6c96e1cc9" Name="lodhi_ai_lib.dll" ShortName="6pr3w1oq.dll" DiskId="1" Source="C:\Users\Umar Hayat\.gemini\antigravity-ide\brain\a2696207-e18e-474b-9ae7-ea077b698b04\scratch\msi_unpack\File\PathFile_I0cafceba9cd245669a207fa6c96e1cc9" />
+                    </Component>
+                    <Component Id="CMP_UninstallShortcut" Guid="{A2373EF0-6922-5456-93D0-56E2EC192575}" Win64="yes">
+                        <RegistryValue Id="reg6A12730C2CF84D6A84B516FC5D22C1F2" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Name="Uninstaller Shortcut" Value="1" Type="integer" KeyPath="yes" />
+                        <RemoveFolder Id="INSTALLDIR" Directory="INSTALLDIR" On="uninstall" />
+                        <Shortcut Id="UninstallShortcut" Directory="INSTALLDIR" Name="Uninstall Lodhi AI" ShortName="ujgoygtp" Description="Uninstalls Lodhi AI" Arguments="/x [ProductCode]" Advertise="yes" />
+                    </Component>
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="Lodhi AI" ShortName="07zhjwxi">
+                    <Component Id="ApplicationShortcut" Guid="{01E01CDA-0859-563E-AF28-673503776BC6}" Win64="yes">
+                        <RegistryValue Id="regD7669D37A8E3D241C2537C499E2B8E09" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Name="Start Menu Shortcut" Value="1" Type="integer" KeyPath="yes" />
+                        <RemoveFolder Id="ApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall" />
+                        <Shortcut Id="ApplicationStartMenuShortcut" Directory="ApplicationProgramsFolder" Name="Lodhi AI" ShortName="7rdt1zdz" Target="[!Path]" Description="Runs Lodhi AI" Icon="ProductIcon" WorkingDirectory="INSTALLDIR">
+                            <ShortcutProperty Id="scpA928DBE89B302EBC9C3D7CA666BC5A03" Key="System.AppUserModel.ID" Value="com.lodhiai.desktop" />
+                        </Shortcut>
+                    </Component>
+                </Directory>
+            </Directory>
+        </Directory>
+        <Feature Id="MainProgram" Absent="disallow" AllowAdvertise="no" ConfigurableDirectory="INSTALLDIR" Description="Installs Lodhi AI." Display="expand" Level="1" Title="Application">
+            <ComponentRef Id="RegistryEntries" />
+            <ComponentRef Id="I0cafceba9cd245669a207fa6c96e1cc9" />
+            <Feature Id="ShortcutsFeature" Level="1" Title="Shortcuts">
+                <ComponentRef Id="ApplicationShortcutDesktop" />
+                <ComponentRef Id="Path" />
+                <ComponentRef Id="CMP_UninstallShortcut" />
+                <ComponentRef Id="ApplicationShortcut" />
+            </Feature>
+            <Feature Id="Environment" Description="Add the install location of the Lodhi AI executable to the PATH system environment variable. This allows the Lodhi AI executable to be called from any location." Level="1" Title="PATH Environment Variable">
+                <ComponentRef Id="Path" />
+            </Feature>
+        </Feature>
+        <Feature Id="External" Absent="disallow" AllowAdvertise="no" Level="1" />
+        <Icon Id="ProductIcon" SourceFile="C:\Users\Umar Hayat\.gemini\antigravity-ide\brain\a2696207-e18e-474b-9ae7-ea077b698b04\scratch\msi_unpack\Icon\ProductIcon" />
+        <MajorUpgrade AllowDowngrades="yes" Schedule="afterInstallFinalize" />
+        <Media Id="1" Cabinet="app.cab" EmbedCab="yes" />
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+        <Property Id="ALLUSERS" Value="1" />
+        <Property Id="ARPNOREPAIR" Value="yes" Secure="yes" />
+        <Property Id="REINSTALLMODE" Value="amus" />
+        <Property Id="ARPPRODUCTICON" Value="ProductIcon" />
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Lodhi AI" />
+        <Property Id="AUTOLAUNCHAPP" Secure="yes" />
+        <Property Id="LAUNCHAPPARGS" Secure="yes" />
+        <Property Id="WIX_UPGRADE_DETECTED" Secure="yes" />
+        <Property Id="INSTALLDIR">
+            <RegistrySearch Id="PrevInstallDirNoName" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Type="raw" Win64="yes" />
+            <RegistrySearch Id="PrevInstallDirWithName" Root="HKCU" Key="Software\lodhiai\Lodhi AI" Name="InstallDir" Type="raw" Win64="yes" />
+        </Property>
+        <Property Id="INSTALLED_WEBVIEW2_VERSION">
+            <RegistrySearch Id="Webview2VersionSystemx64" Root="HKLM" Key="SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" Name="pv" Type="raw" Win64="yes" />
+            <RegistrySearch Id="Webview2VersionUser" Root="HKCU" Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" Name="pv" Type="raw" Win64="yes" />
+            <RegistrySearch Id="Webview2VersionSystemx86" Root="HKLM" Key="SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}" Name="pv" Type="raw" Win64="yes" />
+        </Property>
+        <UIRef Id="WixUI_InstallDir" />
+        <InstallExecuteSequence>
+            <Custom Action="SetARPINSTALLLOCATION" After="CostFinalize" />
+            <Custom Action="SetARPNOMODIFY" After="InstallValidate" />
+            <Custom Action="DownloadAndInvokeBootstrapper" Before="InstallFinalize">NOT(REMOVE OR INSTALLED_WEBVIEW2_VERSION)</Custom>
+            <Custom Action="LaunchApplication" After="InstallFinalize">AUTOLAUNCHAPP AND NOT Installed</Custom>
+            <RemoveShortcuts>Installed AND NOT UPGRADINGPRODUCTCODE</RemoveShortcuts>
+        </InstallExecuteSequence>
+        <InstallUISequence>
+            <Custom Action="SetARPINSTALLLOCATION" After="CostFinalize" />
+        </InstallUISequence>
+    </Product>
+</Wix>

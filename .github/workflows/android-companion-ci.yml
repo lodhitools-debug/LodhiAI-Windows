@@ -1,0 +1,84 @@
+name: Android Companion CI & Debug APK Build
+
+on:
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-companion-ci.yml'
+  pull_request:
+    branches: [ main, master ]
+    paths:
+      - 'android/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build & Test Android Companion APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Gradle 8.7
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.7'
+          cache-disabled: false
+
+      - name: Make Gradlew Executable
+        run: chmod +x android/gradlew
+
+      - name: Configure Google Services Configuration for CI
+        working-directory: android/app
+        run: |
+          if [ ! -f "google-services.json" ]; then
+            if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+              echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > google-services.json
+            else
+              echo '{"project_info":{"project_number":"940673221193","project_id":"lodhi-ai-assistant","storage_bucket":"lodhi-ai-assistant.firebasestorage.app"},"client":[{"client_info":{"mobilesdk_app_id":"1:940673221193:android:15bce8d3e72f2a786df598","android_client_info":{"package_name":"com.lodhideveleper.lodhiai"}},"oauth_client":[],"api_key":[{"current_key":"AIzaFakeCiKeyForBuilding1234567890abcdef"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > google-services.json
+            fi
+          fi
+
+      - name: Run Android Unit Tests
+        working-directory: android
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Assemble Debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Verify APK Generated & Compute SHA-256
+        working-directory: android
+        run: |
+          ls -la app/build/outputs/apk/debug/
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
+          cat app/build/outputs/apk/debug/app-debug.apk.sha256
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lodhi-ai-companion-debug
+          path: |
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/apk/debug/app-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Build Reports on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-failure-reports
+          path: |
+            android/app/build/reports/
+            android/app/build/test-results/
+          retention-days: 7

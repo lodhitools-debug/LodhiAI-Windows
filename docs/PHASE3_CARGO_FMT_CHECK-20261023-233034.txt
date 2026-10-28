@@ -1,0 +1,2163 @@
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:66:
+     let now = current_time_ms();
+     let seq = NEXT_TASK_ID.fetch_add(1, Ordering::SeqCst);
+     let id = format!("task-{now}-{seq}");
+-    let bounded_steps = max_steps.unwrap_or(DEFAULT_MAX_STEPS).min(MAX_ALLOWED_STEPS);
++    let bounded_steps = max_steps
++        .unwrap_or(DEFAULT_MAX_STEPS)
++        .min(MAX_ALLOWED_STEPS);
+ 
+     // Initial plan based on the user prompt
+     let plan = vec![
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:111:
+ ) -> Result<AgentTask, String> {
+     // Check if task was aborted
+     if is_task_aborted(task_id) {
+-        return update_task_status(task_id, AgentTaskStatus::Aborted, Some("Task was aborted by user."));
++        return update_task_status(
++            task_id,
++            AgentTaskStatus::Aborted,
++            Some("Task was aborted by user."),
++        );
+     }
+ 
+-    let mut task = get_agent_task(task_id)
+-        .ok_or_else(|| format!("Agent task '{task_id}' not found."))?;
++    let mut task =
++        get_agent_task(task_id).ok_or_else(|| format!("Agent task '{task_id}' not found."))?;
+ 
+-    if task.status == AgentTaskStatus::Completed || task.status == AgentTaskStatus::Failed || task.status == AgentTaskStatus::Aborted {
++    if task.status == AgentTaskStatus::Completed
++        || task.status == AgentTaskStatus::Failed
++        || task.status == AgentTaskStatus::Aborted
++    {
+         return Ok(task);
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:172:
+     } else {
+         // No more tools to execute -> mark completed
+         task.status = AgentTaskStatus::Completed;
+-        task.summary = Some("Agent task completed successfully. All planned actions verified.".to_string());
++        task.summary =
++            Some("Agent task completed successfully. All planned actions verified.".to_string());
+     }
+ 
+     let step = AgentStep {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:198:
+         }
+     }
+ 
+-    let _ = update_task_status(task_id, AgentTaskStatus::Aborted, Some("Task cancelled by user."));
++    let _ = update_task_status(
++        task_id,
++        AgentTaskStatus::Aborted,
++        Some("Task cancelled by user."),
++    );
+     true
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:227:
+     }
+ }
+ 
+-fn update_task_status(task_id: &str, status: AgentTaskStatus, summary: Option<&str>) -> Result<AgentTask, String> {
++fn update_task_status(
++    task_id: &str,
++    status: AgentTaskStatus,
++    summary: Option<&str>,
++) -> Result<AgentTask, String> {
+     if let Ok(mut tasks) = ACTIVE_TASKS.lock() {
+         if let Some(task) = tasks.get_mut(task_id) {
+             task.status = status;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:295:
+         // Step 2
+         let _ = step_agent_task(&task.id, &project_state, None, Some(call.clone()), false).unwrap();
+         // Step 3 with identical call -> must trigger loop detection
+-        let loop_result = step_agent_task(&task.id, &project_state, None, Some(call.clone()), false).unwrap();
++        let loop_result =
++            step_agent_task(&task.id, &project_state, None, Some(call.clone()), false).unwrap();
+ 
+         assert_eq!(loop_result.status, AgentTaskStatus::Failed);
+         assert!(loop_result.summary.unwrap().contains("Loop detected"));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\agent.rs:322:
+         let exceeded = step_agent_task(&task.id, &project_state, None, Some(call), false).unwrap();
+ 
+         assert_eq!(exceeded.status, AgentTaskStatus::Failed);
+-        assert!(exceeded.summary.unwrap().contains("maximum allowed step bound"));
++        assert!(exceeded
++            .summary
++            .unwrap()
++            .contains("maximum allowed step bound"));
+     }
+ 
+     #[test]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:109:
+             id: "notepad".into(),
+             display_name: "Notepad".into(),
+             executable: "notepad.exe".into(),
+-            description: "Windows text editor for viewing and editing approved workspace documents.".into(),
++            description:
++                "Windows text editor for viewing and editing approved workspace documents.".into(),
+             category: "Editor".into(),
+         },
+         ApprovedApp {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:116:
+             id: "calc".into(),
+             display_name: "Calculator".into(),
+             executable: "calc.exe".into(),
+-            description: "Standard Windows calculator for utility arithmetic and validation.".into(),
++            description: "Standard Windows calculator for utility arithmetic and validation."
++                .into(),
+             category: "Utility".into(),
+         },
+         ApprovedApp {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:123:
+             id: "paint".into(),
+             display_name: "Paint".into(),
+             executable: "mspaint.exe".into(),
+-            description: "Windows image viewer and bitmap editor for inspecting visual assets.".into(),
++            description: "Windows image viewer and bitmap editor for inspecting visual assets."
++                .into(),
+             category: "Graphics".into(),
+         },
+         ApprovedApp {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:130:
+             id: "explorer".into(),
+             display_name: "File Explorer".into(),
+             executable: "explorer.exe".into(),
+-            description: "Windows File Explorer strictly scoped to approved workspace paths.".into(),
++            description: "Windows File Explorer strictly scoped to approved workspace paths."
++                .into(),
+             category: "System".into(),
+         },
+     ]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:179:
+ }
+ 
+ pub fn get_automation_audit_log() -> Vec<AutomationAuditEntry> {
+-    AUDIT_LOG
+-        .lock()
+-        .map(|log| log.clone())
+-        .unwrap_or_default()
++    AUDIT_LOG.lock().map(|log| log.clone()).unwrap_or_default()
+ }
+ 
+ pub fn clear_automation_audit_log() {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:207:
+ /// Redact sensitive terms (passwords, tokens, keys) from window titles
+ pub fn sanitize_window_title(title: &str) -> String {
+     let lower = title.to_ascii_lowercase();
+-    let sensitive_keywords = ["password", "token", "secret", "private_key", "credential", "id_rsa", "bearer"];
++    let sensitive_keywords = [
++        "password",
++        "token",
++        "secret",
++        "private_key",
++        "credential",
++        "id_rsa",
++        "bearer",
++    ];
+     for kw in &sensitive_keywords {
+         if lower.contains(kw) {
+             return "[REDACTED_SENSITIVE_WINDOW_TITLE]".to_string();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:219:
+ /// Validates that a requested path stays strictly within the approved workspace root
+ pub fn validate_workspace_path(path_str: &str, workspace_root: &Path) -> Result<PathBuf, String> {
+     let path = Path::new(path_str);
+-    
++
+     // Check for traversal components
+     for comp in path.components() {
+         if let Component::ParentDir = comp {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:239:
+ 
+     // If file exists, canonicalize it; otherwise canonicalize its parent
+     let canonical_target = if resolved.exists() {
+-        resolved.canonicalize().map_err(|e| format!("Failed to canonicalize path: {e}"))?
++        resolved
++            .canonicalize()
++            .map_err(|e| format!("Failed to canonicalize path: {e}"))?
+     } else {
+         let parent = resolved
+             .parent()
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:246:
+             .ok_or_else(|| "Target path has no valid parent directory.".to_string())?;
+         if parent.exists() {
+-            let canon_parent = parent.canonicalize().map_err(|e| format!("Invalid parent directory: {e}"))?;
++            let canon_parent = parent
++                .canonicalize()
++                .map_err(|e| format!("Invalid parent directory: {e}"))?;
+             if !canon_parent.starts_with(&canonical_root) {
+                 return Err("Target path parent resides outside approved workspace root.".into());
+             }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:262:
+     // Exclude sensitive files
+     if let Some(file_name) = canonical_target.file_name().and_then(|n| n.to_str()) {
+         let lower = file_name.to_ascii_lowercase();
+-        if lower.starts_with(".env") || lower == "id_rsa" || lower.ends_with(".key") || lower.ends_with(".pem") {
+-            return Err(format!("Access to sensitive security file '{file_name}' is blocked."));
++        if lower.starts_with(".env")
++            || lower == "id_rsa"
++            || lower.ends_with(".key")
++            || lower.ends_with(".pem")
++        {
++            return Err(format!(
++                "Access to sensitive security file '{file_name}' is blocked."
++            ));
+         }
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:290:
+                 return Err(format!(
+                     "Application '{}' is not in the approved allowlist. Allowed apps: {:?}",
+                     app_id,
+-                    get_approved_apps().iter().map(|a| &a.id).collect::<Vec<_>>()
++                    get_approved_apps()
++                        .iter()
++                        .map(|a| &a.id)
++                        .collect::<Vec<_>>()
+                 ));
+             }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:299:
+                 if let Some(root) = workspace_root {
+                     let _ = validate_workspace_path(file, root)?;
+                 }
+-                format!("Launch allowlisted application '{}' with workspace file '{}'", app_id, file)
++                format!(
++                    "Launch allowlisted application '{}' with workspace file '{}'",
++                    app_id, file
++                )
+             } else {
+                 format!("Launch allowlisted application '{}'", app_id)
+             };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:324:
+                 .ok_or_else(|| "Missing required parameter: 'path'".to_string())?
+                 .to_string();
+ 
+-            let root = workspace_root.ok_or_else(|| "Workspace root is required to open paths.".to_string())?;
++            let root = workspace_root
++                .ok_or_else(|| "Workspace root is required to open paths.".to_string())?;
+             let valid_path = validate_workspace_path(&target_path, root)?;
+ 
+             Ok(AutomationActionRequest {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:349:
+             parameters,
+             permission_level: AutomationPermissionLevel::Safe,
+             risk_level: RiskLevel::Low,
+-            preview: "Inspect active desktop windows and filter non-sensitive application state".into(),
++            preview: "Inspect active desktop windows and filter non-sensitive application state"
++                .into(),
+             requires_confirmation: false,
+             status: "pending".into(),
+             created_at: now_epoch_ms(),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:399:
+             status: "pending".into(),
+             created_at: now_epoch_ms(),
+         }),
+-        _ => Err(format!("Unsupported or unrecognized automation action type: '{}'", action_type)),
++        _ => Err(format!(
++            "Unsupported or unrecognized automation action type: '{}'",
++            action_type
++        )),
+     }
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:442:
+ 
+             let file_arg = request.parameters["file"].as_str();
+             let validated_file = if let Some(file) = file_arg {
+-                let root = workspace_root.ok_or_else(|| "Workspace root is required when passing file argument.".to_string())?;
++                let root = workspace_root.ok_or_else(|| {
++                    "Workspace root is required when passing file argument.".to_string()
++                })?;
+                 Some(validate_workspace_path(file, root)?)
+             } else {
+                 None
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:467:
+                 .as_str()
+                 .ok_or_else(|| "Missing parameter 'text'".to_string())?;
+             set_clipboard_internal(text)?;
+-            Ok(format!("Successfully copied {} characters to Windows clipboard.", text.len()))
++            Ok(format!(
++                "Successfully copied {} characters to Windows clipboard.",
++                text.len()
++            ))
+         }
+         "get_clipboard" => get_clipboard_internal(),
+         _ => Err(format!("Unknown action type: {}", request.action_type)),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:477:
+ 
+     match result {
+         Ok(output) => {
+-            record_audit(&request.action_type, &request.target, decision, true, elapsed, None);
++            record_audit(
++                &request.action_type,
++                &request.target,
++                decision,
++                true,
++                elapsed,
++                None,
++            );
+             Ok(AutomationActionResult {
+                 request_id: request.id,
+                 action_type: request.action_type,
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:488:
+             })
+         }
+         Err(err) => {
+-            record_audit(&request.action_type, &request.target, decision, false, elapsed, Some(err.clone()));
++            record_audit(
++                &request.action_type,
++                &request.target,
++                decision,
++                false,
++                elapsed,
++                Some(err.clone()),
++            );
+             Ok(AutomationActionResult {
+                 request_id: request.id,
+                 action_type: request.action_type,
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:532:
+         let _ = cmd;
+     }
+ 
+-    Ok(format!("Approved application '{}' launched successfully.", exe))
++    Ok(format!(
++        "Approved application '{}' launched successfully.",
++        exe
++    ))
+ }
+ 
+ fn open_explorer_internal(target_path: &Path) -> Result<String, String> {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:548:
+             .map_err(|e| format!("Failed to open Explorer at '{:?}': {e}", target_path))?;
+     }
+ 
+-    Ok(format!("Opened Explorer at: {}", target_path.to_string_lossy()))
++    Ok(format!(
++        "Opened Explorer at: {}",
++        target_path.to_string_lossy()
++    ))
+ }
+ 
+ fn set_clipboard_internal(text: &str) -> Result<(), String> {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:555:
+     if text.len() > MAX_CLIPBOARD_CHARS {
+-        return Err(format!("Payload exceeds maximum clipboard size of {} bytes.", MAX_CLIPBOARD_CHARS));
++        return Err(format!(
++            "Payload exceeds maximum clipboard size of {} bytes.",
++            MAX_CLIPBOARD_CHARS
++        ));
+     }
+ 
+     // Update in-memory copy
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:565:
+     {
+         use std::io::Write;
+         let mut child = Command::new("powershell.exe")
+-            .args(["-NoProfile", "-NonInteractive", "-Command", "$Input | Set-Clipboard"])
++            .args([
++                "-NoProfile",
++                "-NonInteractive",
++                "-Command",
++                "$Input | Set-Clipboard",
++            ])
+             .stdin(Stdio::piped())
+             .stdout(Stdio::null())
+             .stderr(Stdio::piped())
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:573:
+             .map_err(|e| format!("Failed to spawn clipboard process: {e}"))?;
+ 
+         if let Some(mut stdin) = child.stdin.take() {
+-            stdin.write_all(text.as_bytes()).map_err(|e| e.to_string())?;
++            stdin
++                .write_all(text.as_bytes())
++                .map_err(|e| e.to_string())?;
+         }
+ 
+         let status = child.wait().map_err(|e| e.to_string())?;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:686:
+         let params = serde_json::json!({
+             "app": "notepad.exe"
+         });
+-        let preview = preview_automation_action("launch_app", params, None).expect("preview should succeed");
+-        assert_eq!(preview.permission_level, AutomationPermissionLevel::RequiresApproval);
++        let preview =
++            preview_automation_action("launch_app", params, None).expect("preview should succeed");
++        assert_eq!(
++            preview.permission_level,
++            AutomationPermissionLevel::RequiresApproval
++        );
+         assert_eq!(preview.risk_level, RiskLevel::Medium);
+         assert!(preview.requires_confirmation);
+         assert!(preview.preview.contains("Notepad") || preview.preview.contains("notepad.exe"));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:700:
+         });
+         let result = preview_automation_action("launch_app", params, None);
+         assert!(result.is_err());
+-        assert!(result.unwrap_err().contains("not in the approved allowlist"));
++        assert!(result
++            .unwrap_err()
++            .contains("not in the approved allowlist"));
+     }
+ 
+     #[test]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\automation.rs:766:
+         clear_automation_audit_log();
+ 
+         // Safe action get_clipboard does not require approval
+-        let get_req = preview_automation_action("get_clipboard", serde_json::json!({}), None).unwrap();
++        let get_req =
++            preview_automation_action("get_clipboard", serde_json::json!({}), None).unwrap();
+         assert!(!get_req.requires_confirmation);
+ 
+         let set_req = preview_automation_action(
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:120:
+         &lower
+     };
+ 
+-    let host = without_proto.split('/').next().unwrap_or("").split(':').next().unwrap_or("");
++    let host = without_proto
++        .split('/')
++        .next()
++        .unwrap_or("")
++        .split(':')
++        .next()
++        .unwrap_or("");
+ 
+     if host == "169.254.169.254" || host.starts_with("192.168.") || host.starts_with("10.") {
+-        return Err(format!("Access to private network or metadata address '{}' is blocked.", host));
++        return Err(format!(
++            "Access to private network or metadata address '{}' is blocked.",
++            host
++        ));
+     }
+ 
+     Ok(url_str.trim().to_string())
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:154:
+         let actual_idx = cursor + href_idx + 6;
+         if let Some(quote_end) = raw_html[actual_idx..].find('"') {
+             let link = raw_html[actual_idx..actual_idx + quote_end].trim();
+-            if (link.starts_with("http://") || link.starts_with("https://")) && !links.contains(&link.to_string()) {
++            if (link.starts_with("http://") || link.starts_with("https://"))
++                && !links.contains(&link.to_string())
++            {
+                 links.push(link.to_string());
+                 if links.len() >= 20 {
+                     break;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:176:
+ 
+             let name = if let Some(n_idx) = tag_lower.find("name=\"") {
+                 let val_start = n_idx + 6;
+-                tag_content[val_start..].split('"').next().unwrap_or("input_field").to_string()
++                tag_content[val_start..]
++                    .split('"')
++                    .next()
++                    .unwrap_or("input_field")
++                    .to_string()
+             } else {
+                 "field".into()
+             };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:183:
+ 
+             let f_type = if let Some(t_idx) = tag_lower.find("type=\"") {
+                 let val_start = t_idx + 6;
+-                tag_content[val_start..].split('"').next().unwrap_or("text").to_string()
++                tag_content[val_start..]
++                    .split('"')
++                    .next()
++                    .unwrap_or("text")
++                    .to_string()
+             } else {
+                 "text".into()
+             };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:210:
+ 
+     while i < chars.len() {
+         if !in_tag && chars[i] == '<' {
+-            let rem: String = chars[i..std::cmp::min(i + 10, chars.len())].iter().collect();
++            let rem: String = chars[i..std::cmp::min(i + 10, chars.len())]
++                .iter()
++                .collect();
+             let rem_lower = rem.to_ascii_lowercase();
+             if rem_lower.starts_with("<script") {
+                 in_script = true;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:220:
+             in_tag = true;
+         } else if in_tag && chars[i] == '>' {
+             in_tag = false;
+-            let check: String = chars[std::cmp::max(0, i.saturating_sub(10))..i + 1].iter().collect();
++            let check: String = chars[std::cmp::max(0, i.saturating_sub(10))..i + 1]
++                .iter()
++                .collect();
+             let check_lower = check.to_ascii_lowercase();
+             if check_lower.ends_with("</script>") {
+                 in_script = false;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:238:
+     }
+ 
+     // Collapse multiple whitespace
+-    let normalized = clean_text
+-        .split_whitespace()
+-        .collect::<Vec<_>>()
+-        .join(" ");
++    let normalized = clean_text.split_whitespace().collect::<Vec<_>>().join(" ");
+ 
+     (title, normalized, links, forms)
+ }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:299:
+     <input type="text" name="query" required />
+   </form>
+ </body>
+-</html>"#.into(),
++</html>"#
++                .into(),
+         ));
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:310:
+ 
+     let resp = agent
+         .get(url)
+-        .header("User-Agent", "LodhiAI-Desktop/0.1 (Windows NT 10.0; x86_64; Security-Sandboxed)")
++        .header(
++            "User-Agent",
++            "LodhiAI-Desktop/0.1 (Windows NT 10.0; x86_64; Security-Sandboxed)",
++        )
+         .call()
+         .map_err(|e| format!("HTTP request to '{}' failed: {e}", url))?;
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:338:
+             url: valid_url.clone(),
+             parameters,
+             requires_confirmation: false, // Navigating and reading is safe read-only
+-            preview: format!("Navigate to '{}' and extract sanitized page structure", valid_url),
++            preview: format!(
++                "Navigate to '{}' and extract sanitized page structure",
++                valid_url
++            ),
+             status: "pending".into(),
+             created_at: now_epoch_ms(),
+         }),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:369:
+                 created_at: now_epoch_ms(),
+             })
+         }
+-        _ => Err(format!("Unrecognized browser action type: '{}'", action_type)),
++        _ => Err(format!(
++            "Unrecognized browser action type: '{}'",
++            action_type
++        )),
+     }
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:488:
+     #[test]
+     fn test_preview_and_approval_gate() {
+         // Read action is safe
+-        let read_req = preview_browser_action("navigate", "https://example.com", serde_json::json!({})).unwrap();
++        let read_req =
++            preview_browser_action("navigate", "https://example.com", serde_json::json!({}))
++                .unwrap();
+         assert!(!read_req.requires_confirmation);
+ 
+         // Submit form requires approval
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\browser.rs:514:
+     #[test]
+     fn test_navigate_mock_page_and_history() {
+         clear_browser_history();
+-        let inspection = navigate_and_inspect_url("https://mock.local/test").expect("mock navigation should succeed");
++        let inspection = navigate_and_inspect_url("https://mock.local/test")
++            .expect("mock navigation should succeed");
+         assert_eq!(inspection.title, "Mock Test Page");
+-        assert!(inspection.text_content.contains("Lodhi AI Browser Automation"));
++        assert!(inspection
++            .text_content
++            .contains("Lodhi AI Browser Automation"));
+         assert_eq!(inspection.status_code, 200);
+ 
+         let history = get_browser_history();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\companion.rs:73:
+ }
+ 
+ fn with_companion_state<T, F: FnOnce(&mut CompanionState) -> T>(f: F) -> Result<T, String> {
+-    let mut guard = COMPANION_STATE.lock().map_err(|e| format!("Companion state lock poisoned: {e}"))?;
++    let mut guard = COMPANION_STATE
++        .lock()
++        .map_err(|e| format!("Companion state lock poisoned: {e}"))?;
+     if guard.is_none() {
+         *guard = Some(CompanionState {
+             config: CompanionConfig::default(),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\companion.rs:117:
+ 
+     with_companion_state(|state| {
+         let active = state.active_pairing.as_ref().ok_or_else(|| {
+-            "No active pairing session found. Generate a pairing PIN first on the desktop.".to_string()
++            "No active pairing session found. Generate a pairing PIN first on the desktop."
++                .to_string()
+         })?;
+ 
+         if now > active.expires_at_ms {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\companion.rs:124:
+             state.active_pairing = None;
+-            return Err("The pairing PIN has expired (5-minute limit). Please generate a new PIN.".to_string());
++            return Err(
++                "The pairing PIN has expired (5-minute limit). Please generate a new PIN."
++                    .to_string(),
++            );
+         }
+ 
+         if active.pin != submitted_pin.trim() {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\companion.rs:129:
+-            return Err("Invalid pairing PIN. Verify the digits displayed on your desktop.".to_string());
++            return Err(
++                "Invalid pairing PIN. Verify the digits displayed on your desktop.".to_string(),
++            );
+         }
+ 
+         // Generate device ID and fingerprint
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\companion.rs:209:
+     #[test]
+     fn test_revoke_device() {
+         let session = generate_pairing_pin().unwrap();
+-        let device = verify_and_pair_device(&session.pin, "Samsung S24", "Samsung", "192.168.1.50").unwrap();
++        let device =
++            verify_and_pair_device(&session.pin, "Samsung S24", "Samsung", "192.168.1.50").unwrap();
+ 
+         let devices = list_paired_devices();
+         assert!(devices.iter().any(|d| d.id == device.id));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:202:
+             .or_else(|_| fs::read_to_string(&requirements_path))
+             .unwrap_or_default();
+ 
+-        if py_text.contains("fastapi") { frameworks.push("FastAPI".to_string()); }
+-        if py_text.contains("flask") { frameworks.push("Flask".to_string()); }
+-        if py_text.contains("django") { frameworks.push("Django".to_string()); }
++        if py_text.contains("fastapi") {
++            frameworks.push("FastAPI".to_string());
++        }
++        if py_text.contains("flask") {
++            frameworks.push("Flask".to_string());
++        }
++        if py_text.contains("django") {
++            frameworks.push("Django".to_string());
++        }
+         if py_text.contains("pytest") {
+             frameworks.push("Pytest".to_string());
+             available_checks.push("pytest".to_string());
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:236:
+     } else if detected_languages.contains(&"Go".to_string()) {
+         "Go".to_string()
+     } else {
+-        detected_languages.first().cloned().unwrap_or_else(|| "Unknown".to_string())
++        detected_languages
++            .first()
++            .cloned()
++            .unwrap_or_else(|| "Unknown".to_string())
+     };
+ 
+     // Locate candidate entry points
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:243:
+     let candidates = [
+-        "src/main.tsx", "src/main.ts", "src/index.tsx", "src/index.ts", "src/App.tsx",
+-        "src/main.rs", "src-tauri/src/main.rs", "src-tauri/src/lib.rs",
+-        "main.py", "app.py", "src/main.py",
+-        "main.go", "cmd/main.go",
++        "src/main.tsx",
++        "src/main.ts",
++        "src/index.tsx",
++        "src/index.ts",
++        "src/App.tsx",
++        "src/main.rs",
++        "src-tauri/src/main.rs",
++        "src-tauri/src/lib.rs",
++        "main.py",
++        "app.py",
++        "src/main.py",
++        "main.go",
++        "cmd/main.go",
+     ];
+ 
+     for candidate in candidates {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:283:
+         // 1. Rustc / Cargo check parsing:
+         // error[E0425]: cannot find value `x` in this scope
+         //  --> src/main.rs:14:5
+-        if line.starts_with("error[") || line.starts_with("warning[") || line.starts_with("error:") || line.starts_with("warning:") {
++        if line.starts_with("error[")
++            || line.starts_with("warning[")
++            || line.starts_with("error:")
++            || line.starts_with("warning:")
++        {
+             let is_error = line.starts_with("error");
+             let severity = if is_error { "error" } else { "warning" };
+             let code = extract_rust_code(line);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:326:
+         // 2. TypeScript / tsc parsing:
+         // src/App.tsx:42:15 - error TS2322: Type 'string' is not assignable to type 'number'.
+         // or src/App.tsx(42,15): error TS2322: Type 'string' is not assignable to type 'number'.
+-        if line.contains(" - error TS") || line.contains(" - warning TS") || line.contains("): error TS") || line.contains("): warning TS") {
++        if line.contains(" - error TS")
++            || line.contains(" - warning TS")
++            || line.contains("): error TS")
++            || line.contains("): warning TS")
++        {
+             if let Some(item) = parse_tsc_line(line) {
+                 diagnostics.push(item);
+                 i += 1;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:336:
+ 
+         // 3. ESLint line parsing:
+         //   42:15  error  'foo' is not defined  no-undef
+-        if (line.contains(" error ") || line.contains(" warning ")) && (line.chars().next().map(|c| c.is_ascii_digit()).unwrap_or(false) || lines.get(i.saturating_sub(1)).map(|l| l.ends_with(".ts") || l.ends_with(".tsx") || l.ends_with(".js")).unwrap_or(false)) {
++        if (line.contains(" error ") || line.contains(" warning "))
++            && (line
++                .chars()
++                .next()
++                .map(|c| c.is_ascii_digit())
++                .unwrap_or(false)
++                || lines
++                    .get(i.saturating_sub(1))
++                    .map(|l| l.ends_with(".ts") || l.ends_with(".tsx") || l.ends_with(".js"))
++                    .unwrap_or(false))
++        {
+             if let Some(item) = parse_eslint_line(lines.as_slice(), i) {
+                 diagnostics.push(item);
+                 i += 1;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:362:
+                 code: Some("PYTEST_FAILURE".to_string()),
+                 message,
+                 source: "pytest".to_string(),
+-                suggested_fix: Some("Inspect the failed test assertion and update logic or test fixtures.".to_string()),
++                suggested_fix: Some(
++                    "Inspect the failed test assertion and update logic or test fixtures."
++                        .to_string(),
++                ),
+             });
+             i += 1;
+             continue;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:377:
+                 let line_num = parts[1].trim().parse::<u32>().unwrap_or(1);
+                 let col_num = parts[2].trim().parse::<u32>().ok();
+                 let rest = parts[3].trim();
+-                let severity = if rest.starts_with("error") { "error" } else { "warning" };
++                let severity = if rest.starts_with("error") {
++                    "error"
++                } else {
++                    "warning"
++                };
+                 let message = rest.to_string();
+ 
+                 diagnostics.push(DiagnosticItem {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:388:
+                     code: None,
+                     message,
+                     source: "mypy".to_string(),
+-                    suggested_fix: Some("Check variable type annotations and function return types.".to_string()),
++                    suggested_fix: Some(
++                        "Check variable type annotations and function return types.".to_string(),
++                    ),
+                 });
+                 i += 1;
+                 continue;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:399:
+     }
+ 
+     // Deduplicate diagnostics
+-    diagnostics.dedup_by(|a, b| a.file == b.file && a.line == b.line && a.code == b.code && a.message == b.message);
++    diagnostics.dedup_by(|a, b| {
++        a.file == b.file && a.line == b.line && a.code == b.code && a.message == b.message
++    });
+ 
+     // If no structured diagnostics were detected but tool failed with errors in tool_source, add high-level summary
+-    if diagnostics.is_empty() && (raw_output.contains("error") || raw_output.contains("FAIL") || raw_output.contains("ERR!")) {
++    if diagnostics.is_empty()
++        && (raw_output.contains("error")
++            || raw_output.contains("FAIL")
++            || raw_output.contains("ERR!"))
++    {
+         diagnostics.push(DiagnosticItem {
+             file: "workspace".to_string(),
+             line: 1,
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:411:
+             code: Some("EXECUTION_ERROR".to_string()),
+             message: summarize_raw_error(raw_output),
+             source: tool_source.to_string(),
+-            suggested_fix: Some("Inspect the terminal command output for the exact stack trace.".to_string()),
++            suggested_fix: Some(
++                "Inspect the terminal command output for the exact stack trace.".to_string(),
++            ),
+         });
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:469:
+             let file = line[..paren_idx].trim().replace('\\', "/");
+             let loc_str = &line[paren_idx + 1..close_idx];
+             let loc_parts: Vec<&str> = loc_str.split(',').collect();
+-            let l = loc_parts.first().and_then(|p| p.trim().parse::<u32>().ok()).unwrap_or(1);
++            let l = loc_parts
++                .first()
++                .and_then(|p| p.trim().parse::<u32>().ok())
++                .unwrap_or(1);
+             let c = loc_parts.get(1).and_then(|p| p.trim().parse::<u32>().ok());
+             let rest = &line[close_idx + 2..].trim();
+             (file, l, c, *rest)
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:510:
+ 
+ fn suggest_tsc_fix(code: &Option<String>) -> Option<String> {
+     match code.as_deref() {
+-        Some("TS2304") => Some("Identifier cannot be found; import symbol or declare type definition.".to_string()),
+-        Some("TS2322") => Some("Type mismatch; verify target type or use proper type assertion/narrowing.".to_string()),
+-        Some("TS2339") => Some("Property does not exist on type; verify spelling or update type/interface.".to_string()),
+-        Some("TS2345") => Some("Argument type mismatch; verify argument format matches function parameter.".to_string()),
+-        Some("TS2307") => Some("Cannot find module; verify package is installed in package.json and path is correct.".to_string()),
+-        Some("TS6133") => Some("Declared but never read; prefix with an underscore `_` or remove unused import.".to_string()),
+-        Some("TS7006") => Some("Implicit 'any' type; add explicit TypeScript type annotation to parameter.".to_string()),
++        Some("TS2304") => Some(
++            "Identifier cannot be found; import symbol or declare type definition.".to_string(),
++        ),
++        Some("TS2322") => Some(
++            "Type mismatch; verify target type or use proper type assertion/narrowing.".to_string(),
++        ),
++        Some("TS2339") => Some(
++            "Property does not exist on type; verify spelling or update type/interface."
++                .to_string(),
++        ),
++        Some("TS2345") => Some(
++            "Argument type mismatch; verify argument format matches function parameter."
++                .to_string(),
++        ),
++        Some("TS2307") => Some(
++            "Cannot find module; verify package is installed in package.json and path is correct."
++                .to_string(),
++        ),
++        Some("TS6133") => Some(
++            "Declared but never read; prefix with an underscore `_` or remove unused import."
++                .to_string(),
++        ),
++        Some("TS7006") => Some(
++            "Implicit 'any' type; add explicit TypeScript type annotation to parameter."
++                .to_string(),
++        ),
+         _ => None,
+     }
+ }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:540:
+     let mut file = "unknown".to_string();
+     for prev in lines[..curr_idx].iter().rev() {
+         let p = prev.trim();
+-        if (p.ends_with(".ts") || p.ends_with(".tsx") || p.ends_with(".js") || p.ends_with(".jsx")) && !p.contains(' ') {
++        if (p.ends_with(".ts") || p.ends_with(".tsx") || p.ends_with(".js") || p.ends_with(".jsx"))
++            && !p.contains(' ')
++        {
+             file = p.replace('\\', "/");
+             break;
+         }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:554:
+         code: Some(rule.clone()),
+         message,
+         source: "eslint".to_string(),
+-        suggested_fix: Some(format!("Review ESLint rule '{rule}' guidelines or apply automatic formatter.")),
++        suggested_fix: Some(format!(
++            "Review ESLint rule '{rule}' guidelines or apply automatic formatter."
++        )),
+     })
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:561:
+ fn summarize_raw_error(raw: &str) -> String {
+     for line in raw.lines() {
+         let trimmed = line.trim();
+-        if trimmed.starts_with("Error:") || trimmed.starts_with("ERR!") || trimmed.contains("failed") {
++        if trimmed.starts_with("Error:")
++            || trimmed.starts_with("ERR!")
++            || trimmed.contains("failed")
++        {
+             return trimmed.to_string();
+         }
+     }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:586:
+         "lint" => ("npm.cmd", vec!["run", "lint"]),
+         "cargo-check" => ("cargo", vec!["check"]),
+         "cargo-test" => ("cargo", vec!["test", "--no-run"]),
+-        _ => return Err(format!("Unknown or unapproved diagnostics tool '{tool_id}'")),
++        _ => {
++            return Err(format!(
++                "Unknown or unapproved diagnostics tool '{tool_id}'"
++            ))
++        }
+     };
+ 
+     let start = Instant::now();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:618:
+     }
+ 
+     if timed_out {
+-        return Err(format!("Diagnostics tool '{tool_id}' timed out after 120s."));
++        return Err(format!(
++            "Diagnostics tool '{tool_id}' timed out after 120s."
++        ));
+     }
+ 
+     let mut raw_output = String::new();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:645:
+     let diagnostics = parse_compiler_output(&raw_output, tool_id);
+ 
+     let total_errors = diagnostics.iter().filter(|d| d.severity == "error").count();
+-    let total_warnings = diagnostics.iter().filter(|d| d.severity == "warning").count();
++    let total_warnings = diagnostics
++        .iter()
++        .filter(|d| d.severity == "warning")
++        .count();
+ 
+     Ok(ProjectDiagnosticsReport {
+         tool_id: tool_id.to_string(),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\diagnostics.rs:716:
+         let root = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+         let intel = analyze_project_intelligence(root).expect("should inspect current repo root");
+ 
+-        assert!(intel.detected_languages.contains(&"TypeScript".to_string()) || intel.detected_languages.contains(&"TypeScript/JavaScript".to_string()));
++        assert!(
++            intel.detected_languages.contains(&"TypeScript".to_string())
++                || intel
++                    .detected_languages
++                    .contains(&"TypeScript/JavaScript".to_string())
++        );
+         assert!(intel.frameworks.contains(&"React".to_string()));
+         assert!(intel.frameworks.contains(&"Vite".to_string()));
+         assert_eq!(intel.package_manager, "npm");
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:7:
+ 
+ const DEFAULT_BASE_URL: &str = "https://generativelanguage.googleapis.com";
+ const DEFAULT_TIMEOUT: Duration = Duration::from_secs(45);
+-pub const VERIFIED_MODELS: &[&str] = &[
+-    "gemini-2.0-flash",
+-    "gemini-1.5-flash",
+-    "gemini-1.5-pro",
+-];
++pub const VERIFIED_MODELS: &[&str] = &["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"];
+ 
+ // In-memory runtime override (e.g. for user session or unit testing)
+ static RUNTIME_KEY_OVERRIDE: RwLock<Option<String>> = RwLock::new(None);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:196:
+     if let Ok(key) = std::env::var("GEMINI_API_KEY") {
+         let trimmed = key.trim();
+         if !trimmed.is_empty() {
+-            return Some((trimmed.to_string(), "Environment variable (GEMINI_API_KEY)".to_string()));
++            return Some((
++                trimmed.to_string(),
++                "Environment variable (GEMINI_API_KEY)".to_string(),
++            ));
+         }
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:203:
+     if let Ok(key) = std::env::var("GOOGLE_API_KEY") {
+         let trimmed = key.trim();
+         if !trimmed.is_empty() {
+-            return Some((trimmed.to_string(), "Environment variable (GOOGLE_API_KEY)".to_string()));
++            return Some((
++                trimmed.to_string(),
++                "Environment variable (GOOGLE_API_KEY)".to_string(),
++            ));
+         }
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:212:
+             if let Ok(content) = fs::read_to_string(&path) {
+                 if let Ok(val) = serde_json::from_str::<Value>(&content) {
+                     // 1. Check for DPAPI encrypted key
+-                    if let Some(enc_hex) = val.get("encrypted_gemini_api_key").and_then(|k| k.as_str()) {
++                    if let Some(enc_hex) =
++                        val.get("encrypted_gemini_api_key").and_then(|k| k.as_str())
++                    {
+                         if let Some(bytes) = hex_to_bytes(enc_hex) {
+                             if let Ok(decrypted_bytes) = dpapi_decrypt(&bytes) {
+                                 if let Ok(key_str) = String::from_utf8(decrypted_bytes) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:219:
+                                     let trimmed = key_str.trim().to_string();
+                                     if !trimmed.is_empty() {
+-                                        return Some((trimmed, "Windows DPAPI Encrypted Vault (%APPDATA%)".to_string()));
++                                        return Some((
++                                            trimmed,
++                                            "Windows DPAPI Encrypted Vault (%APPDATA%)".to_string(),
++                                        ));
+                                     }
+                                 }
+                             }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:231:
+                         if !trimmed.is_empty() {
+                             let migrated_key = trimmed.to_string();
+                             let _ = save_api_key(&migrated_key);
+-                            return Some((migrated_key, "Windows DPAPI Encrypted Vault (Migrated)".to_string()));
++                            return Some((
++                                migrated_key,
++                                "Windows DPAPI Encrypted Vault (Migrated)".to_string(),
++                            ));
+                         }
+                     }
+                 }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:301:
+             })
+         };
+ 
+-        fs::write(&path, serde_json::to_string_pretty(&data).unwrap_or_default())
+-            .map_err(|e| format!("Failed to write secrets file: {e}"))?;
++        fs::write(
++            &path,
++            serde_json::to_string_pretty(&data).unwrap_or_default(),
++        )
++        .map_err(|e| format!("Failed to write secrets file: {e}"))?;
+     }
+ 
+     Ok(get_key_status())
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:353:
+         if text.is_empty() {
+             continue;
+         }
+-        let role = if turn.role.eq_ignore_ascii_case("assistant") || turn.role.eq_ignore_ascii_case("model") {
++        let role = if turn.role.eq_ignore_ascii_case("assistant")
++            || turn.role.eq_ignore_ascii_case("model")
++        {
+             "model"
+         } else {
+             "user"
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:378:
+     // Ensure the conversation begins with a user turn as required by Gemini
+     if let Some(first) = contents.first() {
+         if first.get("role").and_then(|r| r.as_str()) == Some("model") {
+-            contents.insert(0, json!({
+-                "role": "user",
+-                "parts": [{ "text": "Hello." }]
+-            }));
++            contents.insert(
++                0,
++                json!({
++                    "role": "user",
++                    "parts": [{ "text": "Hello." }]
++                }),
++            );
+         }
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:420:
+         .header("Content-Type", "application/json")
+         .header("x-goog-api-key", &key)
+         .send_json(payload)
+-        .map_err(|e| redact_key(&format!("Network error contacting Gemini API: {e}"), Some(&key)))?;
++        .map_err(|e| {
++            redact_key(
++                &format!("Network error contacting Gemini API: {e}"),
++                Some(&key),
++            )
++        })?;
+ 
+     let status = res.status().as_u16();
+     let body = res
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:429:
+         .map_err(|e| format!("Failed to read Gemini response: {e}"))?;
+ 
+     if status == 200 {
+-        let val: Value = serde_json::from_str(&body)
+-            .map_err(|e| format!("Malformed JSON from Gemini: {e}"))?;
+-        let text = extract_response_text(&val).unwrap_or_else(|| "Connection successful.".to_string());
+-        Ok(format!("Connected to Google Gemini ({target_model}) via {source}. Verification: {}", text.trim()))
++        let val: Value =
++            serde_json::from_str(&body).map_err(|e| format!("Malformed JSON from Gemini: {e}"))?;
++        let text =
++            extract_response_text(&val).unwrap_or_else(|| "Connection successful.".to_string());
++        Ok(format!(
++            "Connected to Google Gemini ({target_model}) via {source}. Verification: {}",
++            text.trim()
++        ))
+     } else {
+         Err(format_api_error(status, &body, Some(&key)))
+     }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:457:
+         .get(&url)
+         .header("x-goog-api-key", &key)
+         .call()
+-        .map_err(|e| redact_key(&format!("Network error contacting Gemini API: {e}"), Some(&key)))?;
++        .map_err(|e| {
++            redact_key(
++                &format!("Network error contacting Gemini API: {e}"),
++                Some(&key),
++            )
++        })?;
+ 
+     let status = res.status().as_u16();
+     let body = res
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:473:
+             for m in models {
+                 let name = m.get("name").and_then(|n| n.as_str()).unwrap_or_default();
+                 let clean_name = name.strip_prefix("models/").unwrap_or(name);
+-                let supported_methods = m.get("supportedGenerationMethods").and_then(|s| s.as_array());
++                let supported_methods = m
++                    .get("supportedGenerationMethods")
++                    .and_then(|s| s.as_array());
+                 let can_generate = supported_methods
+-                    .map(|methods| methods.iter().any(|v| v.as_str() == Some("generateContent")))
++                    .map(|methods| {
++                        methods
++                            .iter()
++                            .any(|v| v.as_str() == Some("generateContent"))
++                    })
+                     .unwrap_or(true);
+ 
+                 if can_generate && clean_name.starts_with("gemini-") {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:558:
+             .map_err(|e| format!("Malformed JSON response from Gemini API: {e}"))?;
+ 
+         let content = extract_response_text(&val).ok_or_else(|| {
+-            if let Some(reason) = val.get("candidates").and_then(|c| c.as_array()).and_then(|c| c.first()).and_then(|f| f.get("finishReason")).and_then(|r| r.as_str()) {
++            if let Some(reason) = val
++                .get("candidates")
++                .and_then(|c| c.as_array())
++                .and_then(|c| c.first())
++                .and_then(|f| f.get("finishReason"))
++                .and_then(|r| r.as_str())
++            {
+                 format!("Gemini produced no text (finish reason: {reason}).")
+             } else {
+                 "Gemini returned an empty response candidate.".to_string()
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:565:
+             }
+         })?;
+ 
+-        let prompt_tokens = val.get("usageMetadata").and_then(|u| u.get("promptTokenCount")).and_then(|n| n.as_u64());
+-        let candidate_tokens = val.get("usageMetadata").and_then(|u| u.get("candidatesTokenCount")).and_then(|n| n.as_u64());
+-        let total_tokens = val.get("usageMetadata").and_then(|u| u.get("totalTokenCount")).and_then(|n| n.as_u64());
++        let prompt_tokens = val
++            .get("usageMetadata")
++            .and_then(|u| u.get("promptTokenCount"))
++            .and_then(|n| n.as_u64());
++        let candidate_tokens = val
++            .get("usageMetadata")
++            .and_then(|u| u.get("candidatesTokenCount"))
++            .and_then(|n| n.as_u64());
++        let total_tokens = val
++            .get("usageMetadata")
++            .and_then(|u| u.get("totalTokenCount"))
++            .and_then(|n| n.as_u64());
+ 
+         let handler_elapsed_ms = handler_start.elapsed().as_millis() as u64;
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:635:
+ 
+     match status {
+         400 => {
+-            if redacted_server_msg.contains("API key not valid") || redacted_server_msg.contains("API_KEY_INVALID") {
++            if redacted_server_msg.contains("API key not valid")
++                || redacted_server_msg.contains("API_KEY_INVALID")
++            {
+                 "Invalid Google Gemini API key. Verify your key in Model Providers.".to_string()
+             } else if !redacted_server_msg.is_empty() {
+                 format!("Gemini request rejected (400 Bad Request): {redacted_server_msg}")
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:642:
+             } else {
+-                "Gemini request rejected (400 Bad Request). Check model name and parameters.".to_string()
++                "Gemini request rejected (400 Bad Request). Check model name and parameters."
++                    .to_string()
+             }
+         }
+         401 | 403 => {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:647:
+-            if redacted_server_msg.contains("quota") || redacted_server_msg.contains("RESOURCE_EXHAUSTED") {
++            if redacted_server_msg.contains("quota")
++                || redacted_server_msg.contains("RESOURCE_EXHAUSTED")
++            {
+                 "Gemini API quota exceeded or billing not enabled for this project. Check your Google AI Studio plan.".to_string()
+             } else if !redacted_server_msg.is_empty() {
+                 format!("Gemini authorization failed ({status}): {redacted_server_msg}")
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:651:
+             } else {
+-                "Gemini authorization failed. The API key is invalid, inactive, or unauthorized.".to_string()
++                "Gemini authorization failed. The API key is invalid, inactive, or unauthorized."
++                    .to_string()
+             }
+         }
+         429 => {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:743:
+     #[test]
+     fn test_format_gemini_contents_alternating_roles() {
+         let turns = vec![
+-            ChatTurn { role: "user".into(), content: "Prompt 1".into() },
+-            ChatTurn { role: "user".into(), content: "Prompt 2".into() },
+-            ChatTurn { role: "assistant".into(), content: "Answer 1".into() },
+-            ChatTurn { role: "user".into(), content: "Prompt 3".into() },
++            ChatTurn {
++                role: "user".into(),
++                content: "Prompt 1".into(),
++            },
++            ChatTurn {
++                role: "user".into(),
++                content: "Prompt 2".into(),
++            },
++            ChatTurn {
++                role: "assistant".into(),
++                content: "Answer 1".into(),
++            },
++            ChatTurn {
++                role: "user".into(),
++                content: "Prompt 3".into(),
++            },
+         ];
+         let contents = format_gemini_contents(&turns);
+         assert_eq!(contents.len(), 3);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:771:
+                 "candidatesTokenCount": 8,
+                 "totalTokenCount": 13
+             }
+-        }).to_string();
++        })
++        .to_string();
+ 
+         let (base_url, server) = mock_http_server("200 OK", &mock_resp);
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:779:
+             Some(&base_url),
+             Some("test-key-123456"),
+             "gemini-2.0-flash",
+-            vec![ChatTurn { role: "user".into(), content: "Hi".into() }],
++            vec![ChatTurn {
++                role: "user".into(),
++                content: "Hi".into(),
++            }],
+             Some(0.7),
+-        ).unwrap();
++        )
++        .unwrap();
+ 
+         let req = server.join().unwrap();
+         assert!(req.contains("x-goog-api-key: test-key-123456"));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:798:
+                 "message": "API key not valid. Please pass a valid API key.",
+                 "status": "INVALID_ARGUMENT"
+             }
+-        }).to_string();
++        })
++        .to_string();
+ 
+         let (base_url, server) = mock_http_server("400 Bad Request", &mock_err);
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:806:
+             Some(&base_url),
+             Some("invalid-key-xyz"),
+             "gemini-2.0-flash",
+-            vec![ChatTurn { role: "user".into(), content: "Hi".into() }],
++            vec![ChatTurn {
++                role: "user".into(),
++                content: "Hi".into(),
++            }],
+             None,
+-        ).unwrap_err();
++        )
++        .unwrap_err();
+ 
+         server.join().unwrap();
+         assert!(err.contains("Invalid Google Gemini API key"));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:823:
+                 "message": "Resource has been exhausted (e.g. check quota).",
+                 "status": "RESOURCE_EXHAUSTED"
+             }
+-        }).to_string();
++        })
++        .to_string();
+ 
+         let (base_url, server) = mock_http_server("429 Too Many Requests", &mock_err);
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:831:
+             Some(&base_url),
+             Some("test-key-rate-limit"),
+             "gemini-2.0-flash",
+-            vec![ChatTurn { role: "user".into(), content: "Hi".into() }],
++            vec![ChatTurn {
++                role: "user".into(),
++                content: "Hi".into(),
++            }],
+             None,
+-        ).unwrap_err();
++        )
++        .unwrap_err();
+ 
+         server.join().unwrap();
+         assert!(err.contains("rate limit"));
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:840:
+     }
+ 
+-
+     #[test]
+     fn test_missing_key_error() {
+         set_runtime_key_override(None);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:852:
+         // Clear file if present
+         let status = get_key_status();
+         if !status.configured {
+-            let err = chat("gemini-2.0-flash", vec![ChatTurn { role: "user".into(), content: "Hi".into() }], None).unwrap_err();
++            let err = chat(
++                "gemini-2.0-flash",
++                vec![ChatTurn {
++                    role: "user".into(),
++                    content: "Hi".into(),
++                }],
++                None,
++            )
++            .unwrap_err();
+             assert!(err.contains("missing") || err.contains("not configured"));
+         }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:859:
+-        if let Some(val) = old_env { std::env::set_var("GEMINI_API_KEY", val); }
+-        if let Some(val) = old_google_env { std::env::set_var("GOOGLE_API_KEY", val); }
++        if let Some(val) = old_env {
++            std::env::set_var("GEMINI_API_KEY", val);
++        }
++        if let Some(val) = old_google_env {
++            std::env::set_var("GOOGLE_API_KEY", val);
++        }
+     }
+ 
+     #[test]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\gemini.rs:876:
+         #[cfg(target_os = "windows")]
+         assert_ne!(encrypted, secret, "Ciphertext must not match plaintext");
+         let decrypted = dpapi_decrypt(&encrypted).expect("DPAPI decryption must succeed");
+-        assert_eq!(decrypted, secret, "Decrypted data must match original secret");
++        assert_eq!(
++            decrypted, secret,
++            "Decrypted data must match original secret"
++        );
+     }
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:3:
+ use tauri::Emitter;
+ 
+ mod agent;
++mod automation;
++mod browser;
++mod companion;
++mod diagnostics;
+ mod gemini;
+ mod ollama;
+ mod project;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:9:
+ mod rag;
++mod storage;
+ mod tools;
+ mod voice;
+-mod automation;
+-mod browser;
+ mod whatsapp;
+-mod diagnostics;
+-mod storage;
+-mod companion;
+ 
+ #[derive(Debug, Serialize, Deserialize)]
+ pub struct SystemInfo {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:141:
+ 
+     let result = tauri::async_runtime::spawn_blocking(move || {
+         let event_channel = format!("chat-stream://{req_id}");
+-        let stream_result = ollama::chat_stream(
+-            &endpoint,
+-            &model,
+-            messages,
+-            &req_id,
+-            token,
+-            |event| {
++        let stream_result =
++            ollama::chat_stream(&endpoint, &model, messages, &req_id, token, |event| {
+                 let _ = app_handle.emit(&event_channel, &event);
+                 Ok(())
+-            },
+-        );
++            });
+         ollama::unregister_active_stream(&req_id);
+         stream_result
+     })
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:192:
+ 
+ #[tauri::command]
+ async fn test_gemini_connection(model: Option<String>) -> Result<String, String> {
+-    tauri::async_runtime::spawn_blocking(move || {
+-        gemini::test_connection(model.as_deref())
+-    })
+-    .await
+-    .map_err(|error| format!("Gemini connection check did not complete: {error}"))?
++    tauri::async_runtime::spawn_blocking(move || gemini::test_connection(model.as_deref()))
++        .await
++        .map_err(|error| format!("Gemini connection check did not complete: {error}"))?
+ }
+ 
+ #[tauri::command]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:203:
+ async fn list_gemini_models() -> Result<Vec<String>, String> {
+-    tauri::async_runtime::spawn_blocking(move || {
+-        gemini::list_models()
+-    })
+-    .await
+-    .map_err(|error| format!("Gemini model check did not complete: {error}"))?
++    tauri::async_runtime::spawn_blocking(move || gemini::list_models())
++        .await
++        .map_err(|error| format!("Gemini model check did not complete: {error}"))?
+ }
+ 
+ #[tauri::command]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:215:
+     temperature: Option<f32>,
+ ) -> Result<gemini::GeminiChatResponse, String> {
+     let handler_started = Instant::now();
+-    let mut response = tauri::async_runtime::spawn_blocking(move || {
+-        gemini::chat(&model, messages, temperature)
+-    })
+-    .await
+-    .map_err(|error| format!("Gemini chat request did not complete: {error}"))??;
++    let mut response =
++        tauri::async_runtime::spawn_blocking(move || gemini::chat(&model, messages, temperature))
++            .await
++            .map_err(|error| format!("Gemini chat request did not complete: {error}"))??;
+     response.timings.handler_elapsed_ms = handler_started.elapsed().as_millis() as u64;
+     Ok(response)
+ }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:346:
+ ) -> Result<tools::ToolResult, String> {
+     let project_state = state.inner().clone();
+     tauri::async_runtime::spawn_blocking(move || {
+-        Ok(tools::execute_tool(&tool_call, &project_state, permission_granted))
++        Ok(tools::execute_tool(
++            &tool_call,
++            &project_state,
++            permission_granted,
++        ))
+     })
+     .await
+     .map_err(|e| format!("Tool execution failed: {e}"))?
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:367:
+ ) -> Result<agent::AgentTask, String> {
+     let project_state = state.inner().clone();
+     tauri::async_runtime::spawn_blocking(move || {
+-        agent::step_agent_task(&task_id, &project_state, thought, tool_call, approval_granted)
++        agent::step_agent_task(
++            &task_id,
++            &project_state,
++            thought,
++            tool_call,
++            approval_granted,
++        )
+     })
+     .await
+     .map_err(|e| format!("Agent step failed: {e}"))?
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\lib.rs:491:
+ 
+ #[tauri::command]
+ async fn navigate_and_inspect_url(url: String) -> Result<browser::BrowserPageInspection, String> {
+-    tauri::async_runtime::spawn_blocking(move || {
+-        browser::navigate_and_inspect_url(&url)
+-    })
+-    .await
+-    .map_err(|e| format!("Browser navigation failed: {e}"))?
++    tauri::async_runtime::spawn_blocking(move || browser::navigate_and_inspect_url(&url))
++        .await
++        .map_err(|e| format!("Browser navigation failed: {e}"))?
+ }
+ 
+ #[tauri::command]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:446:
+     let mut stream =
+         TcpStream::connect_timeout(&endpoint.address, CONNECT_TIMEOUT).map_err(|error| {
+             if error.kind() == std::io::ErrorKind::TimedOut {
+-                "Timed out connecting to Ollama. Check that the local server is running.".to_string()
++                "Timed out connecting to Ollama. Check that the local server is running."
++                    .to_string()
+             } else if matches!(
+                 error.kind(),
+                 std::io::ErrorKind::ConnectionRefused | std::io::ErrorKind::NotFound
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:453:
+             ) {
+-                "Ollama is not running at the configured local address. Start Ollama and try again.".to_string()
++                "Ollama is not running at the configured local address. Start Ollama and try again."
++                    .to_string()
+             } else {
+                 format!("Could not connect to the local Ollama server: {error}")
+             }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:614:
+                     let eval_count = parsed.get("eval_count").and_then(Value::as_u64);
+                     let eval_duration = parsed.get("eval_duration").and_then(Value::as_u64);
+                     let prompt_eval_count = parsed.get("prompt_eval_count").and_then(Value::as_u64);
+-                    let prompt_eval_duration = parsed.get("prompt_eval_duration").and_then(Value::as_u64);
++                    let prompt_eval_duration =
++                        parsed.get("prompt_eval_duration").and_then(Value::as_u64);
+                     let total_duration = parsed.get("total_duration").and_then(Value::as_u64);
+ 
+                     let timings = if is_done {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:622:
+                             handler_elapsed_ms: 0,
+                             http_elapsed_ms: request_started.elapsed().as_millis() as u64,
+                             ollama_total_ms: total_duration.map(|ns| ns / 1_000_000),
+-                            model_load_ms: parsed.get("load_duration").and_then(Value::as_u64).map(|ns| ns / 1_000_000),
++                            model_load_ms: parsed
++                                .get("load_duration")
++                                .and_then(Value::as_u64)
++                                .map(|ns| ns / 1_000_000),
+                             prompt_eval_ms: prompt_eval_duration.map(|ns| ns / 1_000_000),
+                             generation_ms: eval_duration.map(|ns| ns / 1_000_000),
+                         };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:716:
+                 let eval_count = parsed.get("eval_count").and_then(Value::as_u64);
+                 let eval_duration = parsed.get("eval_duration").and_then(Value::as_u64);
+                 let prompt_eval_count = parsed.get("prompt_eval_count").and_then(Value::as_u64);
+-                let prompt_eval_duration = parsed.get("prompt_eval_duration").and_then(Value::as_u64);
++                let prompt_eval_duration =
++                    parsed.get("prompt_eval_duration").and_then(Value::as_u64);
+                 let total_duration = parsed.get("total_duration").and_then(Value::as_u64);
+ 
+                 let timings = if is_done {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\ollama.rs:724:
+                         handler_elapsed_ms: 0,
+                         http_elapsed_ms: request_started.elapsed().as_millis() as u64,
+                         ollama_total_ms: total_duration.map(|ns| ns / 1_000_000),
+-                        model_load_ms: parsed.get("load_duration").and_then(Value::as_u64).map(|ns| ns / 1_000_000),
++                        model_load_ms: parsed
++                            .get("load_duration")
++                            .and_then(Value::as_u64)
++                            .map(|ns| ns / 1_000_000),
+                         prompt_eval_ms: prompt_eval_duration.map(|ns| ns / 1_000_000),
+                         generation_ms: eval_duration.map(|ns| ns / 1_000_000),
+                     };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\project.rs:1860:
+     fn list_project_checks_returns_empty_when_no_project_or_no_package_json() {
+         let uninitialized_state = ProjectState::default();
+         let checks_uninit = list_project_checks(&uninitialized_state).unwrap();
+-        assert!(checks_uninit.is_empty(), "Should return empty Vec when no project is open");
++        assert!(
++            checks_uninit.is_empty(),
++            "Should return empty Vec when no project is open"
++        );
+ 
+         let test = TestProject::new();
+         // test.0 directory exists but has no package.json
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\project.rs:1867:
+         let state = test.state();
+         let checks_empty = list_project_checks(&state).unwrap();
+-        assert!(checks_empty.is_empty(), "Should return empty Vec when project has no package.json");
++        assert!(
++            checks_empty.is_empty(),
++            "Should return empty Vec when project has no package.json"
++        );
+     }
+ 
+     #[test]
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:12:
+ // Standard SHA-256 implementation (pure Rust, zero external crate dependencies)
+ fn sha256_digest(data: &[u8]) -> String {
+     let mut h: [u32; 8] = [
+-        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
+-        0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
++        0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
++        0x5be0cd19,
+     ];
+ 
+     let k: [u32; 64] = [
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:20:
+-        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+-        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+-        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+-        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+-        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+-        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+-        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+-        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
++        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4,
++        0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe,
++        0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f,
++        0x4a7484aa, 0x5cb0a9dc, 0x76f988da, 0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
++        0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967, 0x27b70a85, 0x2e1b2138, 0x4d2c6dfc,
++        0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85, 0xa2bfe8a1, 0xa81a664b,
++        0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070, 0x19a4c116,
++        0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
++        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7,
++        0xc67178f2,
+     ];
+ 
+     let bit_len = (data.len() as u64) * 8;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:39:
+         let mut w = [0u32; 64];
+         for (i, w_val) in w.iter_mut().take(16).enumerate() {
+             let offset = i * 4;
+-            *w_val = u32::from_be_bytes([chunk[offset], chunk[offset + 1], chunk[offset + 2], chunk[offset + 3]]);
++            *w_val = u32::from_be_bytes([
++                chunk[offset],
++                chunk[offset + 1],
++                chunk[offset + 2],
++                chunk[offset + 3],
++            ]);
+         }
+         for i in 16..64 {
+             let s0 = w[i - 15].rotate_right(7) ^ w[i - 15].rotate_right(18) ^ (w[i - 15] >> 3);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:46:
+             let s1 = w[i - 2].rotate_right(17) ^ w[i - 2].rotate_right(19) ^ (w[i - 2] >> 10);
+-            w[i] = w[i - 16].wrapping_add(s0).wrapping_add(w[i - 7]).wrapping_add(s1);
++            w[i] = w[i - 16]
++                .wrapping_add(s0)
++                .wrapping_add(w[i - 7])
++                .wrapping_add(s1);
+         }
+ 
+         let mut a = h[0];
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:59:
+         for i in 0..64 {
+             let s1 = e.rotate_right(6) ^ e.rotate_right(11) ^ e.rotate_right(25);
+             let ch = (e & f) ^ ((!e) & g);
+-            let temp1 = h_val.wrapping_add(s1).wrapping_add(ch).wrapping_add(k[i]).wrapping_add(w[i]);
++            let temp1 = h_val
++                .wrapping_add(s1)
++                .wrapping_add(ch)
++                .wrapping_add(k[i])
++                .wrapping_add(w[i]);
+             let s0 = a.rotate_right(2) ^ a.rotate_right(13) ^ a.rotate_right(22);
+             let maj = (a & b) ^ (a & c) ^ (b & c);
+             let temp2 = s0.wrapping_add(maj);
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:312:
+ 
+     while i < len {
+         // Look for Begin Text "BT"
+-        if i + 2 <= len && &bytes[i..i + 2] == b"BT" && (i == 0 || bytes[i - 1].is_ascii_whitespace()) {
++        if i + 2 <= len
++            && &bytes[i..i + 2] == b"BT"
++            && (i == 0 || bytes[i - 1].is_ascii_whitespace())
++        {
+             i += 2;
+             let bt_start = i;
+             // Scan until End Text "ET"
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:319:
+             let mut et_pos = None;
+             while i + 2 <= len {
+-                if &bytes[i..i + 2] == b"ET" && (bytes[i + 2.min(len - 1)].is_ascii_whitespace() || i + 2 == len) {
++                if &bytes[i..i + 2] == b"ET"
++                    && (bytes[i + 2.min(len - 1)].is_ascii_whitespace() || i + 2 == len)
++                {
+                     et_pos = Some(i);
+                     i += 2;
+                     break;
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:411:
+         }
+         let serialized = serde_json::to_string_pretty(store)
+             .map_err(|e| format!("Failed to serialize RAG store: {}", e))?;
+-        
++
+         // Write atomically via temporary file
+         let temp_path = path.with_extension("tmp");
+         let mut file = fs::File::create(&temp_path)
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\rag.rs:424:
+         fs::rename(&temp_path, &path)
+             .map_err(|e| format!("Failed to replace RAG database: {}", e))?;
+     }
+-    
++
+     let mut guard = RAG_STORE.lock().unwrap();
+     *guard = Some(store.clone());
+     Ok(())
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:125:
+     };
+ 
+     if !base.exists() {
+-        fs::create_dir_all(&base).map_err(|e| format!("Could not create vault storage folder: {e}"))?;
++        fs::create_dir_all(&base)
++            .map_err(|e| format!("Could not create vault storage folder: {e}"))?;
+     }
+ 
+     let target = base.join("lodhi_vault_store.json");
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:138:
+ /// Loads the persistent vault store. If file is missing, creates default.
+ /// If target is corrupted, automatically recovers from .bak snapshot.
+ pub fn load_vault_store() -> Result<LodhiVaultStore, String> {
+-    let _lock = STORE_LOCK.lock().map_err(|e| format!("Storage lock poisoned: {e}"))?;
++    let _lock = STORE_LOCK
++        .lock()
++        .map_err(|e| format!("Storage lock poisoned: {e}"))?;
+     let (target, backup, _) = get_storage_paths()?;
+ 
+     if target.exists() {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:149:
+                         // Apply migrations if necessary
+                         if store.schema_version < CURRENT_SCHEMA_VERSION {
+                             store.schema_version = CURRENT_SCHEMA_VERSION;
+-                            let _ = save_vault_store_internal(&target, &backup, &target.with_extension("tmp"), &mut store);
++                            let _ = save_vault_store_internal(
++                                &target,
++                                &backup,
++                                &target.with_extension("tmp"),
++                                &mut store,
++                            );
+                         }
+                         return Ok(store);
+                     }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:181:
+ 
+ /// Atomically saves the vault store, creating a recoverable .bak snapshot first.
+ pub fn save_vault_store(store: &mut LodhiVaultStore) -> Result<(), String> {
+-    let _lock = STORE_LOCK.lock().map_err(|e| format!("Storage lock poisoned: {e}"))?;
++    let _lock = STORE_LOCK
++        .lock()
++        .map_err(|e| format!("Storage lock poisoned: {e}"))?;
+     let (target, backup, temp) = get_storage_paths()?;
+     save_vault_store_internal(&target, &backup, &temp, store)
+ }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:216:
+     }
+ 
+     // 3. Atomically rename temp file to target
+-    fs::rename(temp, target).map_err(|e| format!("Failed to atomically replace vault store: {e}"))?;
++    fs::rename(temp, target)
++        .map_err(|e| format!("Failed to atomically replace vault store: {e}"))?;
+ 
+     Ok(())
+ }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\storage.rs:300:
+             }],
+         });
+ 
+-        save_vault_store_internal(&target, &backup, &temp, &mut store).expect("save should succeed");
++        save_vault_store_internal(&target, &backup, &temp, &mut store)
++            .expect("save should succeed");
+         assert!(target.exists());
+ 
+-        let loaded: LodhiVaultStore = serde_json::from_str(&fs::read_to_string(&target).unwrap()).unwrap();
++        let loaded: LodhiVaultStore =
++            serde_json::from_str(&fs::read_to_string(&target).unwrap()).unwrap();
+         assert_eq!(loaded.conversations.len(), 1);
+         assert_eq!(loaded.conversations[0].title, "Test Session");
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:189:
+ /// Safely validates that a relative path stays within the project root,
+ /// rejecting path traversals (..), absolute paths, and secret files.
+ #[allow(dead_code)]
+-pub fn validate_relative_workspace_path(root: &Path, rel_path_str: &str) -> Result<PathBuf, String> {
++pub fn validate_relative_workspace_path(
++    root: &Path,
++    rel_path_str: &str,
++) -> Result<PathBuf, String> {
+     let raw = Path::new(rel_path_str);
+     if raw.is_absolute() {
+         return Err("Absolute paths are not permitted in workspace operations.".to_string());
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:205:
+             }
+             Component::Normal(name) => {
+                 let name_str = name.to_string_lossy().to_lowercase();
+-                if name_str == ".env" || name_str.starts_with(".env.") || name_str == "id_rsa" || name_str == "id_ed25519" {
+-                    return Err(format!("Access to sensitive file '{name_str}' is blocked by security policy."));
++                if name_str == ".env"
++                    || name_str.starts_with(".env.")
++                    || name_str == "id_rsa"
++                    || name_str == "id_ed25519"
++                {
++                    return Err(format!(
++                        "Access to sensitive file '{name_str}' is blocked by security policy."
++                    ));
+                 }
+                 if name_str == ".git" || name_str == "node_modules" || name_str == "target" {
+-                    return Err(format!("Access to internal folder '{name_str}' is blocked."));
++                    return Err(format!(
++                        "Access to internal folder '{name_str}' is blocked."
++                    ));
+                 }
+             }
+             Component::CurDir => {}
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:225:
+ }
+ 
+ /// Executes a tool call against the active project state with permission enforcement.
+-pub fn execute_tool(
+-    call: &ToolCall,
+-    state: &ProjectState,
+-    permission_granted: bool,
+-) -> ToolResult {
++pub fn execute_tool(call: &ToolCall, state: &ProjectState, permission_granted: bool) -> ToolResult {
+     match call.name.as_str() {
+         "workspace_tree" => {
+-            let max_bytes = call.arguments.get("maxFileBytes").and_then(Value::as_u64).unwrap_or(project::DEFAULT_FILE_LIMIT);
++            let max_bytes = call
++                .arguments
++                .get("maxFileBytes")
++                .and_then(Value::as_u64)
++                .unwrap_or(project::DEFAULT_FILE_LIMIT);
+             match project::scan_project(state, max_bytes) {
+                 Ok(tree) => ToolResult::success("workspace_tree", json!(tree)),
+                 Err(err) => ToolResult::error("workspace_tree", &err),
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:241:
+         "workspace_read" => {
+             let path_val = match call.arguments.get("path").and_then(Value::as_str) {
+                 Some(p) => p,
+-                None => return ToolResult::error("workspace_read", "Missing required argument 'path'"),
++                None => {
++                    return ToolResult::error("workspace_read", "Missing required argument 'path'")
++                }
+             };
+-            let max_bytes = call.arguments.get("maxBytes").and_then(Value::as_u64).unwrap_or(project::DEFAULT_FILE_LIMIT);
+-            match project::read_selected_files(state, vec![path_val.to_string()], max_bytes, project::DEFAULT_CONTEXT_LIMIT) {
++            let max_bytes = call
++                .arguments
++                .get("maxBytes")
++                .and_then(Value::as_u64)
++                .unwrap_or(project::DEFAULT_FILE_LIMIT);
++            match project::read_selected_files(
++                state,
++                vec![path_val.to_string()],
++                max_bytes,
++                project::DEFAULT_CONTEXT_LIMIT,
++            ) {
+                 Ok(mut files) => {
+                     if let Some(file) = files.pop() {
+-                        ToolResult::success("workspace_read", json!({
+-                            "path": file.path,
+-                            "content": file.content,
+-                            "sizeBytes": file.size_bytes
+-                        }))
++                        ToolResult::success(
++                            "workspace_read",
++                            json!({
++                                "path": file.path,
++                                "content": file.content,
++                                "sizeBytes": file.size_bytes
++                            }),
++                        )
+                     } else {
+                         ToolResult::error("workspace_read", "File could not be read or was empty.")
+                     }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:262:
+         "workspace_search" => {
+             let query = match call.arguments.get("query").and_then(Value::as_str) {
+                 Some(q) if !q.trim().is_empty() => q.to_lowercase(),
+-                _ => return ToolResult::error("workspace_search", "Missing or empty required argument 'query'"),
++                _ => {
++                    return ToolResult::error(
++                        "workspace_search",
++                        "Missing or empty required argument 'query'",
++                    )
++                }
+             };
+-            let max_results = call.arguments.get("maxResults").and_then(Value::as_u64).unwrap_or(25) as usize;
++            let max_results = call
++                .arguments
++                .get("maxResults")
++                .and_then(Value::as_u64)
++                .unwrap_or(25) as usize;
+ 
+             let root = match project::scan_project(state, project::DEFAULT_FILE_LIMIT) {
+                 Ok(tree) => tree,
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:274:
+             let mut matches = Vec::new();
+             for entry in root.entries {
+                 if !entry.is_directory && entry.selectable {
+-                    if let Ok(files) = project::read_selected_files(state, vec![entry.path.clone()], project::DEFAULT_FILE_LIMIT, project::DEFAULT_CONTEXT_LIMIT) {
++                    if let Ok(files) = project::read_selected_files(
++                        state,
++                        vec![entry.path.clone()],
++                        project::DEFAULT_FILE_LIMIT,
++                        project::DEFAULT_CONTEXT_LIMIT,
++                    ) {
+                         if let Some(file) = files.first() {
+                             for (line_idx, line) in file.content.lines().enumerate() {
+                                 if line.to_lowercase().contains(&query) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:296:
+                 }
+             }
+ 
+-            ToolResult::success("workspace_search", json!({
+-                "query": query,
+-                "matches": matches,
+-                "totalMatches": matches.len()
+-            }))
++            ToolResult::success(
++                "workspace_search",
++                json!({
++                    "query": query,
++                    "matches": matches,
++                    "totalMatches": matches.len()
++                }),
++            )
+         }
+         "workspace_diagnostics" => {
+             let root_opt = state.get_root();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:307:
+             match root_opt {
+-                Some(root) => {
+-                    match crate::diagnostics::analyze_project_intelligence(&root) {
+-                        Ok(intel) => ToolResult::success("workspace_diagnostics", serde_json::to_value(&intel).unwrap_or(json!({}))),
+-                        Err(err) => ToolResult::error("workspace_diagnostics", &err),
+-                    }
+-                }
+-                None => ToolResult::error("workspace_diagnostics", "No workspace directory is currently selected."),
++                Some(root) => match crate::diagnostics::analyze_project_intelligence(&root) {
++                    Ok(intel) => ToolResult::success(
++                        "workspace_diagnostics",
++                        serde_json::to_value(&intel).unwrap_or(json!({})),
++                    ),
++                    Err(err) => ToolResult::error("workspace_diagnostics", &err),
++                },
++                None => ToolResult::error(
++                    "workspace_diagnostics",
++                    "No workspace directory is currently selected.",
++                ),
+             }
+         }
+         "workspace_parse_diagnostics" => {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:318:
+             let raw_output = match call.arguments.get("rawOutput").and_then(Value::as_str) {
+                 Some(r) => r,
+-                None => return ToolResult::error("workspace_parse_diagnostics", "Missing required argument 'rawOutput'"),
++                None => {
++                    return ToolResult::error(
++                        "workspace_parse_diagnostics",
++                        "Missing required argument 'rawOutput'",
++                    )
++                }
+             };
+-            let tool_source = call.arguments.get("toolSource").and_then(Value::as_str).unwrap_or("generic");
++            let tool_source = call
++                .arguments
++                .get("toolSource")
++                .and_then(Value::as_str)
++                .unwrap_or("generic");
+             let parsed = crate::diagnostics::parse_compiler_output(raw_output, tool_source);
+             let total_errors = parsed.iter().filter(|d| d.severity == "error").count();
+             let total_warnings = parsed.iter().filter(|d| d.severity == "warning").count();
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:326:
+ 
+-            ToolResult::success("workspace_parse_diagnostics", json!({
+-                "diagnostics": parsed,
+-                "totalErrors": total_errors,
+-                "totalWarnings": total_warnings,
+-                "toolSource": tool_source,
+-            }))
++            ToolResult::success(
++                "workspace_parse_diagnostics",
++                json!({
++                    "diagnostics": parsed,
++                    "totalErrors": total_errors,
++                    "totalWarnings": total_warnings,
++                    "toolSource": tool_source,
++                }),
++            )
+         }
+         "workspace_propose_edit" => {
+             let path_val = match call.arguments.get("path").and_then(Value::as_str) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:336:
+                 Some(p) => p.to_string(),
+-                None => return ToolResult::error("workspace_propose_edit", "Missing required argument 'path'"),
++                None => {
++                    return ToolResult::error(
++                        "workspace_propose_edit",
++                        "Missing required argument 'path'",
++                    )
++                }
+             };
+-            let proposed_content = match call.arguments.get("proposedContent").and_then(Value::as_str) {
++            let proposed_content = match call
++                .arguments
++                .get("proposedContent")
++                .and_then(Value::as_str)
++            {
+                 Some(c) => c.to_string(),
+-                None => return ToolResult::error("workspace_propose_edit", "Missing required argument 'proposedContent'"),
++                None => {
++                    return ToolResult::error(
++                        "workspace_propose_edit",
++                        "Missing required argument 'proposedContent'",
++                    )
++                }
+             };
+-            let summary = call.arguments.get("summary").and_then(Value::as_str).unwrap_or("Proposed change").to_string();
++            let summary = call
++                .arguments
++                .get("summary")
++                .and_then(Value::as_str)
++                .unwrap_or("Proposed change")
++                .to_string();
+ 
+             // Read original content if file exists
+-            let original_content = match project::read_selected_files(state, vec![path_val.clone()], project::DEFAULT_FILE_LIMIT, project::DEFAULT_CONTEXT_LIMIT) {
++            let original_content = match project::read_selected_files(
++                state,
++                vec![path_val.clone()],
++                project::DEFAULT_FILE_LIMIT,
++                project::DEFAULT_CONTEXT_LIMIT,
++            ) {
+                 Ok(files) => files.first().map(|f| f.content.clone()),
+                 Err(_) => None,
+             };
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:360:
+                 }],
+             };
+ 
+-            ToolResult::success("workspace_propose_edit", json!({
+-                "proposalId": proposal.id,
+-                "path": path_val,
+-                "summary": summary,
+-                "hasOriginal": original_content.is_some(),
+-                "proposedLength": proposed_content.len(),
+-                "previewNotice": "Diff staged. Use workspace_apply_diff with explicit user approval to write to disk."
+-            }))
++            ToolResult::success(
++                "workspace_propose_edit",
++                json!({
++                    "proposalId": proposal.id,
++                    "path": path_val,
++                    "summary": summary,
++                    "hasOriginal": original_content.is_some(),
++                    "proposedLength": proposed_content.len(),
++                    "previewNotice": "Diff staged. Use workspace_apply_diff with explicit user approval to write to disk."
++                }),
++            )
+         }
+         "workspace_apply_diff" => {
+             let proposal_id = match call.arguments.get("proposalId").and_then(Value::as_str) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:374:
+                 Some(id) => id,
+-                None => return ToolResult::error("workspace_apply_diff", "Missing required argument 'proposalId'"),
++                None => {
++                    return ToolResult::error(
++                        "workspace_apply_diff",
++                        "Missing required argument 'proposalId'",
++                    )
++                }
+             };
+ 
+             if !permission_granted {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:379:
+-                return ToolResult::awaiting_approval("workspace_apply_diff", json!({
+-                    "proposalId": proposal_id,
+-                    "action": "write_to_disk",
+-                    "notice": "Applying changes to disk requires explicit user confirmation. Original file will be backed up as .backup."
+-                }));
++                return ToolResult::awaiting_approval(
++                    "workspace_apply_diff",
++                    json!({
++                        "proposalId": proposal_id,
++                        "action": "write_to_disk",
++                        "notice": "Applying changes to disk requires explicit user confirmation. Original file will be backed up as .backup."
++                    }),
++                );
+             }
+ 
+             match project::apply_proposal(state, proposal_id, true) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:387:
+-                Ok(msg) => ToolResult::success("workspace_apply_diff", json!({ "status": "applied", "message": msg })),
++                Ok(msg) => ToolResult::success(
++                    "workspace_apply_diff",
++                    json!({ "status": "applied", "message": msg }),
++                ),
+                 Err(err) => ToolResult::error("workspace_apply_diff", &err),
+             }
+         }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:391:
+         "workspace_run_check" => {
+             let check_id = match call.arguments.get("checkId").and_then(Value::as_str) {
+                 Some(id) => id,
+-                None => return ToolResult::error("workspace_run_check", "Missing required argument 'checkId'"),
++                None => {
++                    return ToolResult::error(
++                        "workspace_run_check",
++                        "Missing required argument 'checkId'",
++                    )
++                }
+             };
+ 
+             if !permission_granted {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:398:
+-                return ToolResult::awaiting_approval("workspace_run_check", json!({
+-                    "checkId": check_id,
+-                    "action": "execute_command",
+-                    "notice": "Running project check commands requires explicit user confirmation."
+-                }));
++                return ToolResult::awaiting_approval(
++                    "workspace_run_check",
++                    json!({
++                        "checkId": check_id,
++                        "action": "execute_command",
++                        "notice": "Running project check commands requires explicit user confirmation."
++                    }),
++                );
+             }
+ 
+             match project::run_project_check(state, check_id, true) {
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\tools.rs:407:
+                 Err(err) => ToolResult::error("workspace_run_check", &err),
+             }
+         }
+-        unknown => ToolResult::error(unknown, &format!("Unknown tool '{unknown}'. See available tools via list_available_tools.")),
++        unknown => ToolResult::error(
++            unknown,
++            &format!("Unknown tool '{unknown}'. See available tools via list_available_tools."),
++        ),
+     }
+ }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\voice.rs:87:
+         let caps = get_voice_capabilities();
+         assert!(caps.microphone_available);
+         assert!(caps.local_isolation_enforced);
+-        assert!(!caps.background_listening_allowed, "Background listening must be strictly prohibited");
++        assert!(
++            !caps.background_listening_allowed,
++            "Background listening must be strictly prohibited"
++        );
+         assert!(caps.stt_engine.contains("Offline"));
+     }
+ 
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\whatsapp.rs:92:
+ 
+ /// Masks recipient phone number for safe audit logging (e.g. +14155552671 -> +1 415 *** **71)
+ pub fn mask_phone_number(phone: &str) -> String {
+-    let clean: String = phone.chars().filter(|c| c.is_ascii_digit() || *c == '+').collect();
++    let clean: String = phone
++        .chars()
++        .filter(|c| c.is_ascii_digit() || *c == '+')
++        .collect();
+     if clean.len() < 8 {
+         return "***-***".into();
+     }
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\whatsapp.rs:215:
+                     "rate_limited",
+                     "failed",
+                     0,
+-                    Some(format!("Rate limit: please wait {wait}ms between dispatches")),
++                    Some(format!(
++                        "Rate limit: please wait {wait}ms between dispatches"
++                    )),
+                 );
+-                return Err(format!("Rate limit exceeded. Please wait {wait}ms before next message."));
++                return Err(format!(
++                    "Rate limit exceeded. Please wait {wait}ms before next message."
++                ));
+             }
+         }
+         *last_time_guard = Some(Instant::now());
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\whatsapp.rs:266:
+ 
+     // If credentials are present in non-test mode, we dispatch to Meta Cloud API endpoint
+     // with ureq (never exposing token in logs)
+-    let url = format!("{}/{}/messages", config.api_endpoint, config.phone_number_id);
++    let url = format!(
++        "{}/{}/messages",
++        config.api_endpoint, config.phone_number_id
++    );
+     let payload = serde_json::json!({
+         "messaging_product": "whatsapp",
+         "to": draft.recipient_phone,
+Diff in \\?\E:\LodhiAI-Windows\src-tauri\src\whatsapp.rs:414:
+         cfg.test_mode = true;
+         configure_whatsapp_settings(cfg).unwrap();
+ 
+-        let draft = draft_whatsapp_message("+14155552671", "Safe automated simulation", None).unwrap();
+-        let res = dispatch_whatsapp_message(draft, true).expect("test mode dispatch should succeed");
++        let draft =
++            draft_whatsapp_message("+14155552671", "Safe automated simulation", None).unwrap();
++        let res =
++            dispatch_whatsapp_message(draft, true).expect("test mode dispatch should succeed");
+ 
+         assert_eq!(res.status, "simulatedDelivered");
+         assert!(res.is_test_mode);
