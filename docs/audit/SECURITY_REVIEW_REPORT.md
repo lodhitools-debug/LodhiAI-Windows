@@ -50,3 +50,4 @@ Command execution within the developer agent is strictly gated:
 - **Pairing PIN:** 6-digit cryptographically generated PIN with a 15-minute countdown timer. Maximum 3 failed attempts before lockout.
 - **RS256 JWT Exchange:** Mobile companion authenticates using an asymmetric key pair. Tokens expire after 15 minutes and require refresh.
 - **Revocation Handshake:** Revoking a device immediately purges its token from memory and disconnects active WebSocket streams.
+

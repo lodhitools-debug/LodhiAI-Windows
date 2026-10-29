@@ -83,3 +83,4 @@ CMD ["node", "dist/server/relay.js"]
   - `src/test/AndroidRelay.test.ts`: **12 / 12 Tests Passing** (covers companion reconnection and disconnect handling).
 - **Live Deployment Status:** **BLOCKED (External)**  
   *Deployment to a live public host requires production cloud provider billing credentials, DNS registration, and SSL certificates, which must be provisioned by the operations team.*
+

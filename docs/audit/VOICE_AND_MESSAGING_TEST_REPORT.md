@@ -52,3 +52,4 @@ Automated messaging workflows are governed by `src-tauri/src/whatsapp.rs` and `s
 - `test_unauthorized_dispatch_is_blocked`: **PASSED** (Blocks dispatch if user cancels modal).
 - `test_test_mode_dispatch_simulates_without_network_call`: **PASSED** (Simulates delivery successfully).
 - `src/test/WhatsAppWorkflow.test.tsx`: **4 / 4 Tests Passing**.
+

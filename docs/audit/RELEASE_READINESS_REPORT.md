@@ -53,3 +53,4 @@ All binaries have been built using standard release optimizations on Windows x86
 1. Enable `Install unknown apps` in Android device settings.
 2. Transfer `app-debug.apk` via USB or direct download from the GitHub Actions release artifact.
 3. Open the app, enter the 6-digit one-time PIN from the desktop Settings screen, and authorize.
+

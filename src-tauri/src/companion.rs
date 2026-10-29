@@ -183,9 +183,13 @@ pub fn get_sync_payload() -> Result<CompanionSyncPayload, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Mutex;
+
+    static COMPANION_TEST_LOCK: Mutex<()> = Mutex::new(());
 
     #[test]
     fn test_pairing_pin_generation_and_verification() {
+        let _guard = COMPANION_TEST_LOCK.lock().unwrap();
         let session = generate_pairing_pin().expect("pin generation should succeed");
         assert_eq!(session.pin.len(), 6);
         assert!(session.pin.chars().all(|c| c.is_ascii_digit()));
@@ -208,6 +212,7 @@ mod tests {
 
     #[test]
     fn test_revoke_device() {
+        let _guard = COMPANION_TEST_LOCK.lock().unwrap();
         let session = generate_pairing_pin().unwrap();
         let device = verify_and_pair_device(&session.pin, "Samsung S24", "Samsung", "192.168.1.50").unwrap();
 
