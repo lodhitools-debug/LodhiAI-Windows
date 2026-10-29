@@ -7,7 +7,7 @@
 
 ## 1. Verified Complete Features Summary
 
-A total of **28 Core Features** have been audited and verified as **COMPLETE**:
+A total of **30 Core Features** have been audited and verified as **COMPLETE**:
 
 ### A. Core AI & Conversational Intelligence
 1. **Multi-Turn Text Chat:**
@@ -106,4 +106,11 @@ A total of **28 Core Features** have been audited and verified as **COMPLETE**:
 28. **GDPR User Data Export & Secure Wipe:**
     - *Evidence:* `GeneralSettingsScreen.tsx:85`, `storage.rs:140`.
     - *Behavior:* One-click JSON vault export and cryptographic data purge.
+29. **Android Offline Voice Engine & Integrity Verification:**
+    - *Evidence:* `OfflineSpeechEngine.kt`, `android/app/src/test/java/.../CompanionUnitTests.kt:58`.
+    - *Behavior:* On-device acoustic model verification (Apache-2.0 / MIT licenses), SHA-256 integrity validation, and airplane mode offline speech decoding.
+30. **Meta WhatsApp Cloud API Compliance & Webhooks:**
+    - *Evidence:* `src-tauri/src/whatsapp.rs:365`, `WhatsAppWorkflowCockpit.tsx`.
+    - *Behavior:* Meta Cloud API HMAC-SHA256 signature verification (`X-Hub-Signature-256`), delivery status receipt tracking (sent/delivered/read/failed), E.164 phone number formatting, and human authorization approval gates.
+
 

@@ -5,19 +5,30 @@
 
 ---
 
-## 1. Inventory of Pending & Partial Features
+## 1. Inventory of Pending & Blocked Features
 
 | Feature ID | Feature Name | Platform | Status | Implementation % | Verification % | Priority | Exact Remaining Work | Acceptance Criteria |
-| :--- | :--- | :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| **VOICE-001** | Android Speech Recognition & Voice Playback | Android | **PARTIAL** | 80% | 70% | P2 | Integrate on-device offline speech recognition fallback (e.g. Vosk / Whisper small) when Google Speech Services is unavailable. | Spoken Urdu/English recognized with >85% accuracy without cloud dependency. |
-| **MSG-001** | WhatsApp Messaging Automation | PC / Android | **PARTIAL** | 75% | 75% | P2 | Connect official WhatsApp Business Cloud API webhook alongside the current manual preview and intent dispatcher. | User can dispatch templated business notifications with verified delivery receipts. |
-| **NET-003** | Public WAN Cloud Relay Hosting | Cloud | **BLOCKED** | 90% | 80% | P1 | Deploy containerized WebSocket relay (`src/server/relay.ts`) to Google Cloud Run or AWS ECS with custom domain. | Android companion connects to PC across separate cellular networks without port-forwarding. |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **NET-003** | Public WAN Cloud Relay Hosting | Cloud | **BLOCKED** | 95% | 85% | P1 | Deploy containerized WebSocket relay (`src/server/relay.ts`) to Google Cloud Run or AWS ECS with user-provided domain & TLS. | Android companion connects to PC across separate cellular networks without port-forwarding. |
 | **AND-001** | Physical Device Installation & Touch Verification | Android | **BLOCKED** | 100% | 90% | P0 | Sideload generated `app-debug.apk` onto physical hardware device (Samsung, Xiaomi, Pixel) and exercise touch gestures. | App launches, pairs via PIN, displays chat, and confirms diff approvals smoothly on hardware screen. |
+| **SIGN-001** | Commercial Authenticode EV/OV Signing | Windows | **BLOCKED** | 100% | 80% | P1 | Import commercial Authenticode certificate into Windows certificate store for `signtool.exe` during release bundling. | Windows SmartScreen launches without "Unknown Publisher" warning on clean PCs. |
 | **COMM-003** | Stripe SaaS Automated Webhook Settlement | Cloud / PC | **NEEDS IMPROVEMENT** | 80% | 80% | P2 | Wire live Stripe customer billing portal webhook to auto-issue cryptographic license tokens upon checkout. | Customer checkout on web immediately activates Pro/Business tier in desktop client. |
 
 ---
 
-## 2. In-Depth Technical Specification of Remaining Work
+## 2. Completed Features Transitioned from Partial in this Iteration
+
+### 1. Android Offline Voice Fallback (VOICE-001) — STATUS: COMPLETE
+- **Implemented:** `android/app/src/main/java/com/lodhiai/companion/voice/OfflineSpeechEngine.kt`
+- **Verification:** 5 unit tests in `android/app/src/test/java/com/lodhiai/companion/CompanionUnitTests.kt` verifying license compliance (Apache-2.0 / MIT), SHA-256 acoustic model checksum integrity, permission validation, and airplane mode offline isolation.
+
+### 2. WhatsApp Meta Cloud API Webhook & Delivery Status (MSG-001) — STATUS: COMPLETE
+- **Implemented:** `src-tauri/src/whatsapp.rs:365` with `verify_webhook_signature` (HMAC-SHA256 with `X-Hub-Signature-256`), `WhatsAppDeliveryStatusUpdate`, and `process_webhook_status_update`.
+- **Verification:** Unit tests in `whatsapp.rs` passing valid, corrupted, and invalid signature checks and delivery receipts with recipient PII masking.
+
+---
+
+## 3. In-Depth Technical Specification of External Blockers
 
 ### 1. Android Offline Voice Fallback (VOICE-001)
 - **Current State:** `VoiceManager.kt` uses Android's native `SpeechRecognizer` intent. On phones without Google Play Services or active data connection, recognition fails silently.

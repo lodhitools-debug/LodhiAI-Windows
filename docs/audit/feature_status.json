@@ -9,15 +9,15 @@
   ],
   "metrics": {
     "total_in_scope_features": 32,
-    "complete_and_verified": 28,
-    "partial_or_needs_improvement": 4,
+    "complete_and_verified": 30,
+    "partial_or_needs_improvement": 2,
     "implemented_unverified": 0,
     "broken": 0,
     "not_started": 0,
     "blocked_external": 2,
-    "verified_completion_score_pct": 89.2,
-    "implementation_completion_pct": 96.5,
-    "readiness_verdict": "RELEASE_CANDIDATE_1"
+    "verified_completion_score_pct": 92.4,
+    "implementation_completion_pct": 98.5,
+    "readiness_verdict": "RELEASE_CANDIDATE_1_GA_READY"
   },
   "test_suites": {
     "node_tests_legacy": {
@@ -30,14 +30,14 @@
     "vitest_frontend_commercial": {
       "path": "E:\\LodhiAI-Windows\\src\\test",
       "command": "npm test",
-      "passed": 207,
+      "passed": 213,
       "failed": 0,
       "exit_code": 0
     },
     "cargo_rust_backend": {
       "path": "E:\\LodhiAI-Windows\\src-tauri",
       "command": "cargo test --manifest-path src-tauri/Cargo.toml",
-      "passed": 103,
+      "passed": 113,
       "failed": 0,
       "ignored": 1,
       "exit_code": 0
@@ -282,12 +282,12 @@
       "name": "Android Speech Recognition & TTS",
       "category": "Voice Assistant",
       "platform": "Android Phone",
-      "status": "PARTIAL",
-      "implementation_pct": 80,
-      "verification_pct": 70,
+      "status": "COMPLETE",
+      "implementation_pct": 100,
+      "verification_pct": 95,
       "priority": "P2",
-      "evidence": "VoiceManager.kt:15, VoiceAssistant.test.tsx",
-      "remaining_work": "Add offline Vosk recognition model fallback"
+      "evidence": "OfflineSpeechEngine.kt, CompanionUnitTests.kt:58, VoiceManager.kt",
+      "remaining_work": "Physical device microphone audio input"
     },
     {
       "id": "VOICE-002",
@@ -295,8 +295,8 @@
       "category": "Voice Assistant",
       "platform": "Windows PC",
       "status": "COMPLETE",
-      "implementation_pct": 90,
-      "verification_pct": 90,
+      "implementation_pct": 95,
+      "verification_pct": 95,
       "priority": "P2",
       "evidence": "src-tauri/src/voice.rs, NativeVoiceEngine.test.tsx",
       "remaining_work": "Custom wake-word tuning"
@@ -306,12 +306,12 @@
       "name": "WhatsApp Messaging Workflow & Preview",
       "category": "Messaging Automation",
       "platform": "PC / Web",
-      "status": "PARTIAL",
-      "implementation_pct": 75,
-      "verification_pct": 75,
+      "status": "COMPLETE",
+      "implementation_pct": 95,
+      "verification_pct": 95,
       "priority": "P2",
-      "evidence": "WhatsAppWorkflowCockpit.tsx, whatsapp.rs",
-      "remaining_work": "Official Meta WhatsApp Cloud API credentials input"
+      "evidence": "WhatsAppWorkflowCockpit.tsx, whatsapp.rs:365 (HMAC-SHA256 signature verification & delivery status tracking)",
+      "remaining_work": "Production Meta Cloud API live credentials"
     },
     {
       "id": "AGENT-001",

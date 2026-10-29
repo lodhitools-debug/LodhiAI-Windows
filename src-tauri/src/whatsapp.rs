@@ -362,6 +362,94 @@ pub fn clear_whatsapp_audit_log() {
     }
 }
 
+/// Verifies Meta Cloud API Webhook HMAC-SHA256 signature (X-Hub-Signature-256 header)
+#[allow(dead_code)]
+pub fn verify_webhook_signature(payload_bytes: &[u8], signature_header: &str, app_secret: &str) -> bool {
+    let prefix = "sha256=";
+    if !signature_header.starts_with(prefix) || app_secret.is_empty() {
+        return false;
+    }
+    let expected_hex = &signature_header[prefix.len()..];
+    let computed_sig = crate::licensing::hmac_sha256(app_secret.as_bytes(), payload_bytes);
+    let computed_hex = computed_sig
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>();
+
+    computed_hex.eq_ignore_ascii_case(expected_hex)
+}
+
+#[allow(dead_code)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct WhatsAppDeliveryStatusUpdate {
+    pub message_id: String,
+    pub status: String, // "sent", "delivered", "read", "failed"
+    pub recipient_id: String,
+    pub timestamp_ms: u64,
+    pub error_code: Option<u32>,
+    pub error_message: Option<String>,
+}
+
+/// Processes an inbound delivery receipt or read status webhook payload from Meta Cloud API
+#[allow(dead_code)]
+pub fn process_webhook_status_update(payload_json: &str) -> Result<WhatsAppDeliveryStatusUpdate, String> {
+    let parsed: serde_json::Value = serde_json::from_str(payload_json)
+        .map_err(|e| format!("Invalid WhatsApp webhook payload: {e}"))?;
+
+    let status_obj = parsed
+        .get("entry")
+        .and_then(|e| e.get(0))
+        .and_then(|c| c.get("changes"))
+        .and_then(|ch| ch.get(0))
+        .and_then(|v| v.get("value"))
+        .and_then(|s| s.get("statuses"))
+        .and_then(|st| st.get(0))
+        .ok_or_else(|| "No status payload found in webhook object".to_string())?;
+
+    let message_id = status_obj.get("id").and_then(|i| i.as_str()).unwrap_or_default().to_string();
+    let status = status_obj.get("status").and_then(|s| s.as_str()).unwrap_or("unknown").to_string();
+    let recipient_id = status_obj.get("recipient_id").and_then(|r| r.as_str()).unwrap_or_default().to_string();
+    let timestamp_ms = status_obj
+        .get("timestamp")
+        .and_then(|t| t.as_str())
+        .and_then(|ts| ts.parse::<u64>().ok())
+        .map(|s| s * 1000)
+        .unwrap_or_else(now_epoch_ms);
+
+    let error_code = status_obj
+        .get("errors")
+        .and_then(|e| e.get(0))
+        .and_then(|err| err.get("code"))
+        .and_then(|c| c.as_u64())
+        .map(|u| u as u32);
+    let error_message = status_obj
+        .get("errors")
+        .and_then(|e| e.get(0))
+        .and_then(|err| err.get("title"))
+        .and_then(|t| t.as_str())
+        .map(String::from);
+
+    let masked = mask_phone_number(&recipient_id);
+    record_audit(
+        &masked,
+        "webhook_status",
+        "webhook_received",
+        &status,
+        0,
+        error_message.clone(),
+    );
+
+    Ok(WhatsAppDeliveryStatusUpdate {
+        message_id,
+        status,
+        recipient_id: masked,
+        timestamp_ms,
+        error_code,
+        error_message,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -426,5 +514,47 @@ mod tests {
         assert!(!audit.is_empty());
         assert_eq!(audit.last().unwrap().status, "simulatedDelivered");
         assert_eq!(audit.last().unwrap().permission_decision, "user_approved");
+    }
+
+    #[test]
+    fn test_webhook_signature_verification() {
+        let payload = b"{\"object\":\"whatsapp_business_account\"}";
+        let secret = "test_meta_app_secret_12345";
+        let sig = crate::licensing::hmac_sha256(secret.as_bytes(), payload);
+        let sig_hex = sig.iter().map(|b| format!("{b:02x}")).collect::<String>();
+        let header = format!("sha256={sig_hex}");
+
+        assert!(verify_webhook_signature(payload, &header, secret));
+        assert!(!verify_webhook_signature(payload, "sha256=bad_hex", secret));
+        assert!(!verify_webhook_signature(payload, &header, "wrong_secret"));
+    }
+
+    #[test]
+    fn test_process_webhook_delivery_status_update() {
+        clear_whatsapp_audit_log();
+        let sample_payload = r#"{
+            "object": "whatsapp_business_account",
+            "entry": [{
+                "id": "100200300",
+                "changes": [{
+                    "value": {
+                        "messaging_product": "whatsapp",
+                        "metadata": { "display_phone_number": "15551234", "phone_number_id": "999888" },
+                        "statuses": [{
+                            "id": "wamid.HBgLMTY1MD...",
+                            "status": "delivered",
+                            "timestamp": "1730160000",
+                            "recipient_id": "14155552671"
+                        }]
+                    },
+                    "field": "messages"
+                }]
+            }]
+        }"#;
+
+        let res = process_webhook_status_update(sample_payload).expect("webhook should parse");
+        assert_eq!(res.status, "delivered");
+        assert_eq!(res.message_id, "wamid.HBgLMTY1MD...");
+        assert!(res.recipient_id.contains("***"));
     }
 }

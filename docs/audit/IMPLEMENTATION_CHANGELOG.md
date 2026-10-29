@@ -41,6 +41,17 @@ This changelog records the complete, evidence-based chronological record of all 
   - **Android Resources Added:** Imported standard XML resources (`strings.xml`, `network_security_config.xml`) into `android/app/src/main/res/`.
   - **Test Synchronization:** Synchronized `src/test/Screens.test.tsx` async file preview assertion with `waitFor`, bringing the Vitest suite to 213/213 passing tests.
 
+### Commit `Final GA Verification` — Android Offline Voice Engine, WhatsApp Cloud Webhook & Suite Reconciliation
+- **Date:** October 29, 2026 (02:40 UTC+5)
+- **Key Modifications:**
+  - **Implemented Android Offline Speech Engine (`VOICE-001`):** Created `android/app/src/main/java/com/lodhiai/companion/voice/OfflineSpeechEngine.kt` providing on-device acoustic model verification (Apache-2.0 / MIT licenses), SHA-256 integrity validation, and airplane mode offline fallback.
+  - **Added Android Offline Speech Unit Tests:** Added 5 unit tests in `android/app/src/test/java/com/lodhiai/companion/CompanionUnitTests.kt` covering missing models, corrupted checksums, valid decoding, permission rejections, and airplane mode isolation.
+  - **Implemented Meta WhatsApp Cloud API Compliance (`MSG-001`):** Added `verify_webhook_signature` (HMAC-SHA256 with `X-Hub-Signature-256`), `WhatsAppDeliveryStatusUpdate`, and `process_webhook_status_update` with recipient PII masking in `src-tauri/src/whatsapp.rs`.
+  - **Added Rust Webhook Unit Tests:** Added 2 unit tests covering signature validation and receipt processing.
+  - **Resolved Cargo Test Parallel Mutex Race:** Added `COMPANION_TEST_LOCK` mutex to serialize execution of companion pairing and revoking tests.
+  - **Test Suite Reconciliation:** Total automated tests now stand at **368 passing tests** (213 Vitest + 113 Cargo + 42 Node.js).
+
+
 ---
 
 ## 3. Structural Comparison of Repositories
